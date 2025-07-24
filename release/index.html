@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>税務書類自動リネームシステム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'メイリオ', sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .app-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .app-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .main-container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            padding: 25px;
+            overflow-y: auto;
+        }
+        
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .file-area {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+        
+        .log-area {
+            height: 200px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            overflow-y: auto;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .folder-input-group {
+            margin-bottom: 15px;
+        }
+        
+        .folder-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .folder-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .folder-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .folder-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #555;
+        }
+        
+        .btn-secondary:hover {
+            background: #d5dbdd;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .status-active {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background: #95a5a6;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+        }
+        
+        .file-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .file-card.selected {
+            border: 2px solid #3498db;
+            background: #f0f8ff;
+        }
+        
+        .file-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+        
+        .file-rename {
+            font-size: 13px;
+            color: #3498db;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .file-category {
+            font-size: 11px;
+            background: #e8f4f8;
+            color: #2980b9;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #95a5a6;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .progress-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-width: 400px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .log-entry {
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        
+        .log-success {
+            color: #4ec9b0;
+        }
+        
+        .log-error {
+            color: #f48771;
+        }
+        
+        .log-info {
+            color: #569cd6;
+        }
+        
+        .log-warning {
+            color: #dcdcaa;
+        }
+        
+        .settings-icon {
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .settings-icon:hover {
+            opacity: 1;
+        }
+        
+        /* 編集モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #95a5a6;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+        
+        .modal-close:hover {
+            color: #e74c3c;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+        
+        .edit-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        
+        .file-card:hover .edit-button {
+            opacity: 1;
+        }
+        
+        .edit-button:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-title">
+            <span>📁</span>
+            <span>税務書類自動リネームシステム</span>
+            <span class="settings-icon" onclick="showSettings()">⚙️</span>
+        </div>
+        <div class="app-subtitle">e-Tax/eLTAX/マネーフォワードからダウンロードした税務書類を自動整理</div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="section">
+                <h3 class="section-title">
+                    <span>📂</span>
+                    <span>フォルダ設定</span>
+                </h3>
+                
+                <div class="folder-input-group">
+                    <label class="folder-label">監視フォルダ</label>
+                    <div class="folder-input-wrapper">
+                        <input type="text" id="watchFolder" class="folder-input" value="C:\Downloads">
+                        <button class="btn btn-secondary" onclick="selectWatchFolder()">参照</button>
+                    </div>
+                </div>
+                
+                <div class="folder-input-group">
+                    <label class="folder-label">出力フォルダ</label>
+                    <div class="folder-input-wrapper">
+                        <input type="text" id="outputFolder" class="folder-input" value="C:\TaxDocs\2024">
+                        <button class="btn btn-secondary" onclick="selectOutputFolder()">参照</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">
+                    <span>🎮</span>
+                    <span>操作</span>
+                </h3>
+                
+                <div class="control-buttons">
+                    <button id="watchBtn" class="btn btn-primary" onclick="toggleWatching()">
+                        <span class="status-indicator status-inactive"></span>
+                        監視開始
+                    </button>
+                    <button class="btn btn-secondary" onclick="scanNow()">今すぐスキャン</button>
+                    <button class="btn btn-secondary" onclick="openOutputFolder()">出力フォルダを開く</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">
+                    <span>📊</span>
+                    <span>統計情報</span>
+                </h3>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalFiles">0</div>
+                        <div class="stat-label">検出ファイル</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successCount">0</div>
+                        <div class="stat-label">処理済み</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="errorCount">0</div>
+                        <div class="stat-label">エラー</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successRate">0%</div>
+                        <div class="stat-label">成功率</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="file-area">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="section-title">
+                        <span>📋</span>
+                        <span>検出ファイル一覧</span>
+                    </h3>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary" onclick="selectAll()">全選択</button>
+                        <button class="btn btn-secondary" onclick="deselectAll()">全解除</button>
+                        <button class="btn btn-success" onclick="processSelected()">
+                            <span>🔄</span>
+                            選択ファイルを処理
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="fileList" class="file-grid">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>ファイルが検出されていません</p>
+                        <p style="margin-top: 10px; font-size: 14px;">監視を開始するか、「今すぐスキャン」を実行してください</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="log-area" id="logArea">
+                <div class="log-entry log-info">[システム] 起動完了 - 税務書類自動リネームシステム v1.0.0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-overlay" id="progressOverlay">
+        <div class="progress-modal">
+            <h3 style="margin-bottom: 15px;">ファイル処理中...</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;">0%</div>
+            </div>
+            <p id="progressText" style="text-align: center; color: #666; font-size: 14px;">準備中...</p>
+        </div>
+    </div>
+
+    <!-- ファイル編集モーダル -->
+    <div class="modal" id="editModal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            <h3 class="modal-header">ファイル名編集</h3>
+            
+            <div class="form-group">
+                <label class="form-label">元のファイル名</label>
+                <input type="text" class="form-input" id="editOriginalName" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">新しいファイル名</label>
+                <input type="text" class="form-input" id="editNewName" placeholder="例: 0001_法人税申告書_2407.pdf">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">書類種別</label>
+                    <select class="form-select" id="editDocumentType" onchange="updateSuggestedName()">
+                        <option value="法人税申告書">法人税申告書</option>
+                        <option value="受信通知">受信通知</option>
+                        <option value="納付情報">納付情報</option>
+                        <option value="都道府県税申告書">都道府県税申告書</option>
+                        <option value="市民税申告書">市民税申告書</option>
+                        <option value="消費税申告書">消費税申告書</option>
+                        <option value="決算書">決算書</option>
+                        <option value="総勘定元帳">総勘定元帳</option>
+                        <option value="補助元帳">補助元帳</option>
+                        <option value="固定資産">固定資産台帳</option>
+                        <option value="税区分集計表">税区分集計表</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">決算期</label>
+                    <input type="text" class="form-input" id="editFiscalYear" placeholder="2407" onchange="updateSuggestedName()">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">推奨ファイル名</label>
+                <input type="text" class="form-input" id="editSuggestedName" readonly style="background: #f8f9fa;">
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="applySuggestedName()">推奨名を適用</button>
+                <button class="btn btn-secondary" onclick="closeEditModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="saveEditedName()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

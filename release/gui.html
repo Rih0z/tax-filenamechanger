@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>税務書類自動リネームシステム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'メイリオ', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .panel h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .folder-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-active {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background: #e74c3c;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .file-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .file-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .file-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .file-rename {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .file-category {
+            font-size: 11px;
+            color: #3498db;
+            margin-left: 10px;
+        }
+        
+        .log-area {
+            height: 200px;
+            overflow-y: auto;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        
+        .log-success {
+            color: #2ecc71;
+        }
+        
+        .log-error {
+            color: #e74c3c;
+        }
+        
+        .log-info {
+            color: #3498db;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 税務書類自動リネームシステム</h1>
+            <div class="subtitle">e-Tax/eLTAX/マネーフォワードからダウンロードした税務書類を自動整理</div>
+        </header>
+
+        <div class="main-grid">
+            <!-- 左側：設定パネル -->
+            <div class="panel">
+                <h2>⚙️ 設定</h2>
+                
+                <div class="setting-group">
+                    <label>監視フォルダ</label>
+                    <div class="folder-input">
+                        <input type="text" id="watchFolder" placeholder="C:\Downloads" value="C:\Downloads">
+                        <button onclick="selectFolder('watch')">参照</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label>出力フォルダ</label>
+                    <div class="folder-input">
+                        <input type="text" id="outputFolder" placeholder="C:\TaxDocs\2024" value="C:\TaxDocs\2024">
+                        <button onclick="selectFolder('output')">参照</button>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button id="startWatch" onclick="toggleWatching()">
+                        <span class="status-indicator status-inactive"></span>
+                        監視開始
+                    </button>
+                    <button onclick="scanNow()">今すぐスキャン</button>
+                    <button onclick="showSettings()">詳細設定</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalFiles">0</div>
+                        <div class="stat-label">検出ファイル</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="successCount">0</div>
+                        <div class="stat-label">成功</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="errorCount">0</div>
+                        <div class="stat-label">エラー</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="successRate">0%</div>
+                        <div class="stat-label">成功率</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：ファイル一覧パネル -->
+            <div class="panel">
+                <h2>📋 検出ファイル</h2>
+                
+                <div class="controls">
+                    <button onclick="selectAll()">全選択</button>
+                    <button onclick="deselectAll()">全解除</button>
+                    <button onclick="processSelected()" style="background: #27ae60;">
+                        🔄 選択ファイルを処理
+                    </button>
+                </div>
+
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;">0%</div>
+                </div>
+
+                <div class="file-list" id="fileList">
+                    <div style="text-align: center; color: #7f8c8d; padding: 50px;">
+                        ファイルが検出されていません<br>
+                        監視を開始するか、「今すぐスキャン」を実行してください
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ログパネル -->
+        <div class="panel">
+            <h2>📊 処理ログ</h2>
+            <div class="log-area" id="logArea">
+                <div class="log-entry log-info">システム準備完了...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSettings()">&times;</span>
+            <h2>詳細設定</h2>
+            
+            <div style="margin: 20px 0;">
+                <label>
+                    <input type="checkbox" id="autoProcess" checked>
+                    新規ファイル検出時に自動処理
+                </label>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label>
+                    <input type="checkbox" id="createBackup" checked>
+                    処理前にバックアップを作成
+                </label>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label>
+                    <input type="checkbox" id="createSubfolders" checked>
+                    カテゴリ別サブフォルダを作成
+                </label>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label>デフォルト決算期</label>
+                <input type="text" id="defaultFiscalYear" value="2407" style="width: 100px; margin-left: 10px;">
+            </div>
+            
+            <button onclick="saveSettings()">保存</button>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let isWatching = false;
+        let detectedFiles = [];
+        let processedFiles = new Set();
+        let watchInterval = null;
+
+        // 設定
+        const settings = {
+            autoProcess: true,
+            createBackup: true,
+            createSubfolders: true,
+            defaultFiscalYear: '2407'
+        };
+
+        // ログ追加
+        function addLog(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        // 監視切り替え
+        function toggleWatching() {
+            if (isWatching) {
+                stopWatching();
+            } else {
+                startWatching();
+            }
+        }
+
+        // 監視開始
+        function startWatching() {
+            const watchFolder = document.getElementById('watchFolder').value;
+            if (!watchFolder) {
+                alert('監視フォルダを指定してください');
+                return;
+            }
+
+            isWatching = true;
+            const button = document.getElementById('startWatch');
+            button.innerHTML = '<span class="status-indicator status-active"></span>監視停止';
+            
+            addLog(`監視開始: ${watchFolder}`, 'success');
+            
+            // 初回スキャン
+            scanFolder();
+            
+            // 定期スキャン（5秒ごと）
+            watchInterval = setInterval(scanFolder, 5000);
+        }
+
+        // 監視停止
+        function stopWatching() {
+            isWatching = false;
+            const button = document.getElementById('startWatch');
+            button.innerHTML = '<span class="status-indicator status-inactive"></span>監視開始';
+            
+            if (watchInterval) {
+                clearInterval(watchInterval);
+                watchInterval = null;
+            }
+            
+            addLog('監視停止', 'info');
+        }
+
+        // フォルダスキャン
+        async function scanFolder() {
+            const watchFolder = document.getElementById('watchFolder').value;
+            
+            try {
+                // Node.js連携（実際の実装では child_process を使用）
+                const files = await getFilesFromFolder(watchFolder);
+                
+                const newFiles = files.filter(file => !processedFiles.has(file.path));
+                
+                if (newFiles.length > 0) {
+                    addLog(`${newFiles.length}個の新規ファイルを検出`, 'info');
+                    newFiles.forEach(file => {
+                        detectedFiles.push(file);
+                        if (settings.autoProcess) {
+                            // 自動処理
+                            processFile(file);
+                        }
+                    });
+                    updateFileList();
+                }
+                
+            } catch (error) {
+                addLog(`スキャンエラー: ${error.message}`, 'error');
+            }
+        }
+
+        // 今すぐスキャン
+        function scanNow() {
+            addLog('手動スキャン実行', 'info');
+            scanFolder();
+        }
+
+        // ファイル一覧更新
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            
+            if (detectedFiles.length === 0) {
+                fileList.innerHTML = `
+                    <div style="text-align: center; color: #7f8c8d; padding: 50px;">
+                        ファイルが検出されていません<br>
+                        監視を開始するか、「今すぐスキャン」を実行してください
+                    </div>
+                `;
+                return;
+            }
+            
+            fileList.innerHTML = detectedFiles.map((file, index) => {
+                const analysis = analyzeFileName(file.name);
+                const suggestedName = generateSuggestedName(analysis);
+                const category = getCategoryFolder(suggestedName || file.name);
+                
+                return `
+                    <div class="file-item">
+                        <input type="checkbox" id="file-${index}" checked>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-rename">
+                                → ${suggestedName || '(推奨名なし)'}
+                                <span class="file-category">${category}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            updateStats();
+        }
+
+        // ファイル名解析（簡易版）
+        function analyzeFileName(fileName) {
+            const analysis = {
+                documentType: '不明',
+                companyName: null,
+                fiscalYear: null
+            };
+
+            // e-Tax形式
+            const eTaxPattern = /^(.+?)_(\d{8})(.+?)_(\d{14})\.pdf$/;
+            const match = fileName.match(eTaxPattern);
+            
+            if (match) {
+                const docName = match[1];
+                const fiscalDate = match[2];
+                const company = match[3];
+                
+                analysis.fiscalYear = fiscalDate.substring(2, 4) + fiscalDate.substring(4, 6);
+                analysis.companyName = company.replace(/\s+/g, '');
+                
+                if (docName.includes('法人税及び地方法人税申告書')) {
+                    analysis.documentType = '法人税申告書';
+                } else if (docName.includes('消費税申告書')) {
+                    analysis.documentType = '消費税申告書';
+                } else if (docName.includes('都道府県民税')) {
+                    analysis.documentType = '都道府県税申告書';
+                }
+            } else {
+                // 手動命名パターン
+                if (fileName.includes('受信通知')) {
+                    analysis.documentType = '受信通知';
+                } else if (fileName.includes('納付情報')) {
+                    analysis.documentType = '納付情報';
+                } else if (fileName.includes('決算書')) {
+                    analysis.documentType = '決算書';
+                }
+            }
+            
+            return analysis;
+        }
+
+        // 推奨名生成
+        function generateSuggestedName(analysis) {
+            const docTypeMap = {
+                '法人税申告書': { number: '0001', name: '法人税及び地方法人税申告書' },
+                '受信通知': { number: '0003', name: '受信通知' },
+                '納付情報': { number: '0004', name: '納付情報' },
+                '都道府県税申告書': { number: '1000', name: '都道府県税申告書' },
+                '消費税申告書': { number: '3001', name: '消費税及び地方消費税申告書' },
+                '決算書': { number: '5001', name: '決算書' }
+            };
+
+            const mapping = docTypeMap[analysis.documentType];
+            if (!mapping) return null;
+
+            const fiscalYear = analysis.fiscalYear || settings.defaultFiscalYear;
+            return `${mapping.number}_${mapping.name}_${fiscalYear}.pdf`;
+        }
+
+        // カテゴリフォルダ取得
+        function getCategoryFolder(fileName) {
+            const numberMatch = fileName.match(/^(\d{4})/);
+            if (!numberMatch) return 'その他';
+
+            const number = parseInt(numberMatch[1]);
+            
+            if (number >= 0 && number <= 999) return '0000番台_法人税';
+            if (number >= 1000 && number <= 1999) return '1000番台_都道府県税';
+            if (number >= 2000 && number <= 2999) return '2000番台_市民税';
+            if (number >= 3000 && number <= 3999) return '3000番台_消費税';
+            if (number >= 5000 && number <= 5999) return '5000番台_決算書類';
+            
+            return 'その他';
+        }
+
+        // 選択ファイル処理
+        async function processSelected() {
+            const selectedFiles = [];
+            detectedFiles.forEach((file, index) => {
+                const checkbox = document.getElementById(`file-${index}`);
+                if (checkbox && checkbox.checked) {
+                    selectedFiles.push(file);
+                }
+            });
+
+            if (selectedFiles.length === 0) {
+                alert('処理するファイルを選択してください');
+                return;
+            }
+
+            addLog(`${selectedFiles.length}個のファイルの処理を開始`, 'info');
+            
+            // プログレスバー表示
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const progress = Math.round(((i + 1) / selectedFiles.length) * 100);
+                
+                progressFill.style.width = `${progress}%`;
+                progressFill.textContent = `${progress}%`;
+                
+                await processFile(file);
+                
+                // UIを更新するために少し待機
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            progressBar.style.display = 'none';
+            addLog('処理完了', 'success');
+            
+            // 処理済みファイルをリストから削除
+            detectedFiles = detectedFiles.filter(file => !processedFiles.has(file.path));
+            updateFileList();
+        }
+
+        // ファイル処理（実際の処理は Node.js 側で実行）
+        async function processFile(file) {
+            try {
+                const analysis = analyzeFileName(file.name);
+                const suggestedName = generateSuggestedName(analysis);
+                
+                if (suggestedName) {
+                    // ここで実際のリネーム処理を呼び出す
+                    addLog(`✅ ${file.name} → ${suggestedName}`, 'success');
+                    processedFiles.add(file.path);
+                    updateStats();
+                } else {
+                    addLog(`⚠️ ${file.name} - 推奨名を生成できませんでした`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ ${file.name} - エラー: ${error.message}`, 'error');
+            }
+        }
+
+        // 統計更新
+        function updateStats() {
+            document.getElementById('totalFiles').textContent = detectedFiles.length;
+            document.getElementById('successCount').textContent = processedFiles.size;
+            document.getElementById('errorCount').textContent = 0; // TODO: エラーカウント実装
+            
+            const rate = detectedFiles.length > 0 
+                ? Math.round((processedFiles.size / detectedFiles.length) * 100) 
+                : 0;
+            document.getElementById('successRate').textContent = `${rate}%`;
+        }
+
+        // 全選択
+        function selectAll() {
+            detectedFiles.forEach((_, index) => {
+                const checkbox = document.getElementById(`file-${index}`);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        // 全解除
+        function deselectAll() {
+            detectedFiles.forEach((_, index) => {
+                const checkbox = document.getElementById(`file-${index}`);
+                if (checkbox) checkbox.checked = false;
+            });
+        }
+
+        // 設定表示
+        function showSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        // 設定閉じる
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        // 設定保存
+        function saveSettings() {
+            settings.autoProcess = document.getElementById('autoProcess').checked;
+            settings.createBackup = document.getElementById('createBackup').checked;
+            settings.createSubfolders = document.getElementById('createSubfolders').checked;
+            settings.defaultFiscalYear = document.getElementById('defaultFiscalYear').value;
+            
+            addLog('設定を保存しました', 'success');
+            closeSettings();
+        }
+
+        // ダミーデータ生成（デモ用）
+        async function getFilesFromFolder(folder) {
+            // 実際の実装では Node.js から fs.readdir の結果を取得
+            return [
+                { name: '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf', path: folder + '\\file1.pdf' },
+                { name: '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf', path: folder + '\\file2.pdf' },
+                { name: '決算書_20250720_1535.pdf', path: folder + '\\file3.pdf' }
+            ];
+        }
+
+        // 初期化
+        addLog('システム初期化完了', 'success');
+    </script>
+</body>
+</html>

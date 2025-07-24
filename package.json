@@ -1,0 +1,139 @@
+{
+  "name": "tax-filenamechanger",
+  "productName": "税務書類リネーマー",
+  "version": "1.0.0",
+  "description": "税務書類の自動リネーム・振り分けシステム",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "concurrently -n \"VITE,ELECTRON\" -c \"yellow.bold,blue.bold\" \"npm run dev:renderer\" \"npm run dev:main\"",
+    "dev:renderer": "vite",
+    "dev:main": "tsc-watch -p tsconfig.main.json --onSuccess \"electron .\"",
+    "build": "npm run build:renderer && npm run build:main",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.main.json",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "test": "jest",
+    "test:unit": "jest --testPathPattern=tests/unit",
+    "test:integration": "jest --testPathPattern=tests/integration",
+    "test:e2e": "jest --testPathPattern=tests/e2e",
+    "test:real": "NODE_ENV=test jest tests/e2e/RealFileProcessing.test.ts --verbose --no-cache",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,css,scss}\"",
+    "type-check": "tsc --noEmit",
+    "electron:rebuild": "electron-rebuild",
+    "clean": "rimraf dist out .vite",
+    "clean:all": "npm run clean && rimraf node_modules package-lock.json"
+  },
+  "keywords": [
+    "electron",
+    "tax",
+    "document",
+    "rename",
+    "automation"
+  ],
+  "author": {
+    "name": "Rih0z",
+    "email": "support@rih0z.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rih0z/tax-filenamechanger.git"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.3",
+    "@mui/material": "^5.15.3",
+    "@reduxjs/toolkit": "^2.0.1",
+    "chokidar": "^3.5.3",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7",
+    "fs-extra": "^11.2.0",
+    "pdf-parse": "^1.1.1",
+    "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.48.2",
+    "react-redux": "^9.0.4",
+    "react-router-dom": "^6.21.1",
+    "react-toastify": "^10.0.3",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.6",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.46",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/react-dom": "^18.2.18",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "playwright": "^1.40.1",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.4.0",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10"
+  },
+  "build": {
+    "appId": "com.rih0z.tax-filenamechanger",
+    "productName": "税務書類リネーマー",
+    "publish": [{
+      "provider": "github",
+      "owner": "Rih0z",
+      "repo": "tax-filenamechanger"
+    }],
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "resources/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "resources/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "resources/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    }
+  }
+}
