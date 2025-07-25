@@ -67,3 +67,6 @@ release/package-lock.json
 release/*.log
 release/win-unpacked/
 release/builder-debug.yml
+
+# Sample data
+sample/

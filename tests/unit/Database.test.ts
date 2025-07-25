@@ -89,7 +89,7 @@ describe('Database', () => {
       const mockClients = [
         {
           id: 'client1',
-          name: 'メトロノーム株式会社',
+          name: 'テスト会社株式会社',
           corporate_number: '1234567890123',
           fiscal_year_end: '2407',
           output_folder: 'C:\\TaxDocs\\Metro\\2407期',
@@ -98,7 +98,7 @@ describe('Database', () => {
         },
         {
           id: 'client2',
-          name: 'エバーリッジ株式会社',
+          name: 'サンプル会社株式会社',
           corporate_number: null,
           fiscal_year_end: '2503',
           output_folder: 'C:\\TaxDocs\\Ever\\2503期',
@@ -117,7 +117,7 @@ describe('Database', () => {
       expect(clients).toHaveLength(2);
       expect(clients[0]).toEqual({
         id: 'client1',
-        name: 'メトロノーム株式会社',
+        name: 'テスト会社株式会社',
         corporateNumber: '1234567890123',
         fiscalYearEnd: '2407',
         outputFolder: 'C:\\TaxDocs\\Metro\\2407期',
@@ -216,7 +216,7 @@ describe('Database', () => {
 
       const fileInfo = {
         path: 'C:\\TaxDocs\\Client1\\0001_法人税申告書_2407.pdf',
-        originalName: '法人税及び地方法人税申告書_20240731メトロノーム株式会社.pdf',
+        originalName: '法人税及び地方法人税申告書_20240731テスト会社株式会社.pdf',
         newName: '0001_法人税申告書_2407.pdf',
         documentType: '法人税申告書',
         clientId: 'client1'
@@ -296,7 +296,7 @@ describe('Database', () => {
         {
           id: 'history1',
           client_id: 'client1',
-          client_name: 'メトロノーム株式会社',
+          client_name: 'テスト会社株式会社',
           processed_at: '2025-01-01T10:00:00Z',
           total_files: 2,
           success_count: 2,
@@ -318,7 +318,7 @@ describe('Database', () => {
       expect(history[0]).toEqual({
         id: 'history1',
         clientId: 'client1',
-        clientName: 'メトロノーム株式会社',
+        clientName: 'テスト会社株式会社',
         processedAt: '2025-01-01T10:00:00Z',
         totalFiles: 2,
         successCount: 2,

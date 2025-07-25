@@ -60,7 +60,7 @@ export class PDFParser {
     };
 
     // e-Tax/eLTAXの命名パターン
-    // 例: 法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf
+    // 例: 法人税及び地方法人税申告書_20240731[法人名]_20250720130102.pdf
     const eTaxPattern = /^(.+?)_(\d{8})(.+?)_(\d{14})\.pdf$/;
     const match = fileName.match(eTaxPattern);
 

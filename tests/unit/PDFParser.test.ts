@@ -11,40 +11,40 @@ describe('PDFParser', () => {
 
   describe('ファイル名解析テスト', () => {
     test('法人税申告書のe-Tax形式ファイル名を正しく解析する', () => {
-      const fileName = '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf';
+      const fileName = '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf';
       const analysis = (parser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.CORPORATE_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
       expect(analysis.confidence).toBe(0.9);
     });
 
     test('消費税申告書のe-Tax形式ファイル名を正しく解析する', () => {
-      const fileName = '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf';
+      const fileName = '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf';
       const analysis = (parser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.CONSUMPTION_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
       expect(analysis.confidence).toBe(0.9);
     });
 
     test('都道府県税申告書（東京都）のファイル名を正しく解析する', () => {
-      const fileName = '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf';
+      const fileName = '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf';
       const analysis = (parser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.PREFECTURAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
     });
 
     test('市民税申告書（蒲郡市）のファイル名を正しく解析する', () => {
-      const fileName = '蒲郡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720132131.pdf';
+      const fileName = '蒲郡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720132131.pdf';
       const analysis = (parser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.MUNICIPAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
     });
 
@@ -82,7 +82,7 @@ describe('PDFParser', () => {
     test('法人税申告書の推奨名を正しく生成する', () => {
       const analysis = {
         documentType: DocumentType.CORPORATE_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         submissionDate: '2025-07-20',
         confidence: 0.9
@@ -95,7 +95,7 @@ describe('PDFParser', () => {
     test('消費税申告書の推奨名を正しく生成する', () => {
       const analysis = {
         documentType: DocumentType.CONSUMPTION_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         submissionDate: '2025-07-20',
         confidence: 0.9
@@ -108,7 +108,7 @@ describe('PDFParser', () => {
     test('受信通知の推奨名を正しく生成する', () => {
       const analysis = {
         documentType: DocumentType.RECEIPT_NOTICE,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         confidence: 0.8
       };
@@ -120,7 +120,7 @@ describe('PDFParser', () => {
     test('納付情報の推奨名を正しく生成する', () => {
       const analysis = {
         documentType: DocumentType.PAYMENT_INFO,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         confidence: 0.8
       };
@@ -185,8 +185,8 @@ describe('PDFParser', () => {
 
   describe('会社名正規化テスト', () => {
     test('会社名の正規化が正しく動作する', () => {
-      expect((parser as any).normalizeCompanyName('メトロノーム　株式会社')).toBe('メトロノーム株式会社');
-      expect((parser as any).normalizeCompanyName('エバーリッジ株式会社')).toBe('エバーリッジ株式会社');
+      expect((parser as any).normalizeCompanyName('テスト会社　株式会社')).toBe('テスト会社株式会社');
+      expect((parser as any).normalizeCompanyName('サンプル会社株式会社')).toBe('サンプル会社株式会社');
       expect((parser as any).normalizeCompanyName('六興実業　株式会社')).toBe('六興実業株式会社');
     });
   });

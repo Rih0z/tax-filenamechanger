@@ -16,52 +16,52 @@ describe('サンプルファイルテスト', () => {
   describe('リネーム前ファイルの解析テスト', () => {
     const testCases = [
       {
-        input: '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf',
+        input: '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf',
         expectedOutput: '0001_法人税及び地方法人税申告書_2407.pdf',
         expectedDocType: DocumentType.CORPORATE_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
-        input: '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf',
+        input: '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf',
         expectedOutput: '3001_消費税及び地方消費税申告書_2407.pdf',
         expectedDocType: DocumentType.CONSUMPTION_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
-        input: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf',
+        input: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf',
         expectedOutput: '1011_東京都_法人都道府県民税事業税_2407.pdf',
         expectedDocType: DocumentType.PREFECTURAL_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
-        input: '愛知県　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社.pdf',
+        input: '愛知県　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社.pdf',
         expectedOutput: '1021_愛知県_法人都道府県民税事業税_2407.pdf',
         expectedDocType: DocumentType.PREFECTURAL_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
-        input: '福岡県　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社.pdf',
+        input: '福岡県　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社.pdf',
         expectedOutput: '1031_福岡県_法人都道府県民税事業税_2407.pdf',
         expectedDocType: DocumentType.PREFECTURAL_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
-        input: '蒲郡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720132131.pdf',
+        input: '蒲郡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720132131.pdf',
         expectedOutput: '2001_蒲郡市_法人市民税_2407.pdf',
         expectedDocType: DocumentType.MUNICIPAL_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
-        input: '福岡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720133028.pdf',
+        input: '福岡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720133028.pdf',
         expectedOutput: '2011_福岡市_法人市民税_2407.pdf',
         expectedDocType: DocumentType.MUNICIPAL_TAX,
-        expectedCompany: 'メトロノーム株式会社',
+        expectedCompany: 'テスト会社株式会社',
         expectedFiscalYear: '2407'
       },
       {
@@ -184,21 +184,21 @@ describe('サンプルファイルテスト', () => {
     test('ファイルリネーマーで推奨名を生成できる', () => {
       const suggestedName1 = fileRenamer.generateSuggestedName(
         DocumentType.CORPORATE_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       expect(suggestedName1).toBe('0001_法人税及び地方法人税申告書_2407.pdf');
 
       const suggestedName2 = fileRenamer.generateSuggestedName(
         DocumentType.CONSUMPTION_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       expect(suggestedName2).toBe('3001_消費税及び地方消費税申告書_2407.pdf');
 
       const suggestedName3 = fileRenamer.generateSuggestedName(
         DocumentType.PREFECTURAL_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407',
         '東京都'
       );

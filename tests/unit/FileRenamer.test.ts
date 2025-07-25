@@ -19,7 +19,7 @@ describe('FileRenamer', () => {
     test('法人税申告書の推奨名を正しく生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.CORPORATE_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -29,7 +29,7 @@ describe('FileRenamer', () => {
     test('消費税申告書の推奨名を正しく生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.CONSUMPTION_TAX,
-        'エバーリッジ株式会社',
+        'サンプル会社株式会社',
         '2503'
       );
       
@@ -39,7 +39,7 @@ describe('FileRenamer', () => {
     test('東京都の都道府県税申告書の推奨名を生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.PREFECTURAL_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407',
         '東京都'
       );
@@ -50,7 +50,7 @@ describe('FileRenamer', () => {
     test('受信通知の推奨名を生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.RECEIPT_NOTICE,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -60,7 +60,7 @@ describe('FileRenamer', () => {
     test('納付情報の推奨名を生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.PAYMENT_INFO,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -70,7 +70,7 @@ describe('FileRenamer', () => {
     test('決算書の推奨名を生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.FINANCIAL_STATEMENT,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -80,7 +80,7 @@ describe('FileRenamer', () => {
     test('固定資産台帳の推奨名を生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.FIXED_ASSET,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -90,7 +90,7 @@ describe('FileRenamer', () => {
     test('税区分集計表の推奨名を生成する', () => {
       const result = fileRenamer.generateSuggestedName(
         DocumentType.TAX_CLASSIFICATION,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       

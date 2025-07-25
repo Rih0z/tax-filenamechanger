@@ -49,12 +49,12 @@ describe('PDFParser', () => {
   
   describe('parseFileName', () => {
     it('法人税申告書のファイル名を正しく解析する', async () => {
-      const fileName = '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf';
+      const fileName = '法人税及び地方法人税申告書_20240731クライアントA株式会社_20250720130102.pdf';
       const result = parser.parseFileName(fileName);
       
       expect(result).toEqual({
         documentType: DocumentType.CORPORATE_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'クライアントA株式会社',
         fiscalYear: '2407',
         submissionDate: '2025-07-20'
       });

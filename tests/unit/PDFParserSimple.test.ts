@@ -82,30 +82,30 @@ describe('PDFパーサー基本機能テスト', () => {
 
   describe('e-Taxファイル名解析', () => {
     test('法人税申告書の正確な解析', () => {
-      const fileName = '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf';
+      const fileName = '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf';
       const analysis = parser.analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.CORPORATE_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
       expect(analysis.confidence).toBeGreaterThan(0.8);
     });
 
     test('消費税申告書の正確な解析', () => {
-      const fileName = '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf';
+      const fileName = '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf';
       const analysis = parser.analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.CONSUMPTION_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
     });
 
     test('都道府県税申告書の解析', () => {
-      const fileName = '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf';
+      const fileName = '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf';
       const analysis = parser.analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.PREFECTURAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.prefecture).toBe('東京都');
     });
   });

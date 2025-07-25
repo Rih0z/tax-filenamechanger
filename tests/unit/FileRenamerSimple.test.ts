@@ -93,7 +93,7 @@ describe('ファイルリネーマー基本機能テスト', () => {
     test('法人税申告書の推奨名を正しく生成する', () => {
       const result = renamer.generateSuggestedName(
         DocumentType.CORPORATE_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -103,7 +103,7 @@ describe('ファイルリネーマー基本機能テスト', () => {
     test('消費税申告書の推奨名を正しく生成する', () => {
       const result = renamer.generateSuggestedName(
         DocumentType.CONSUMPTION_TAX,
-        'エバーリッジ株式会社',
+        'サンプル会社株式会社',
         '2503'
       );
       
@@ -113,7 +113,7 @@ describe('ファイルリネーマー基本機能テスト', () => {
     test('都道府県税申告書の推奨名を生成する', () => {
       const result = renamer.generateSuggestedName(
         DocumentType.PREFECTURAL_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -123,7 +123,7 @@ describe('ファイルリネーマー基本機能テスト', () => {
     test('固定資産台帳の推奨名を生成する', () => {
       const result = renamer.generateSuggestedName(
         DocumentType.FIXED_ASSET,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -133,7 +133,7 @@ describe('ファイルリネーマー基本機能テスト', () => {
     test('税区分集計表の推奨名を生成する', () => {
       const result = renamer.generateSuggestedName(
         DocumentType.TAX_CLASSIFICATION,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       
@@ -233,7 +233,7 @@ describe('ファイルリネーマー基本機能テスト', () => {
       for (const testCase of testCases) {
         const suggestedName = renamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           '2407'
         );
         expect(suggestedName.startsWith(testCase.expectedPrefix)).toBe(true);

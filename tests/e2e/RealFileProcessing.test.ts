@@ -59,21 +59,21 @@ describe('実ファイル処理E2Eテスト', () => {
       // 実際のREADMEサンプルファイル名での検証
       const testCases = [
         {
-          fileName: '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf',
+          fileName: '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf',
           expectedType: DocumentType.CORPORATE_TAX,
-          expectedCompany: 'メトロノーム株式会社',
+          expectedCompany: 'テスト会社株式会社',
           expectedFiscalYear: '2407'
         },
         {
-          fileName: '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf',
+          fileName: '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf',
           expectedType: DocumentType.CONSUMPTION_TAX,
-          expectedCompany: 'メトロノーム株式会社',
+          expectedCompany: 'テスト会社株式会社',
           expectedFiscalYear: '2407'
         },
         {
-          fileName: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf',
+          fileName: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf',
           expectedType: DocumentType.PREFECTURAL_TAX,
-          expectedCompany: 'メトロノーム株式会社',
+          expectedCompany: 'テスト会社株式会社',
           expectedFiscalYear: '2407'
         }
       ];
@@ -146,7 +146,7 @@ describe('実ファイル処理E2Eテスト', () => {
       for (const testCase of testCases) {
         const result = fileRenamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           testCase.fiscalYear
         );
         

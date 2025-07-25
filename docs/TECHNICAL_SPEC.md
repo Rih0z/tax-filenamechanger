@@ -206,9 +206,9 @@ window.addEventListener('unhandledrejection', (event) => {
   "clients": [
     {
       "id": "uuid",
-      "name": "メトロノーム株式会社",
+      "name": "クライアントA株式会社",
       "fiscalYearEnd": "2505",
-      "outputFolder": "D:\\税務書類\\メトロノーム\\2505期"
+      "outputFolder": "D:\\税務書類\\クライアントA\\2505期"
     }
   ]
 }

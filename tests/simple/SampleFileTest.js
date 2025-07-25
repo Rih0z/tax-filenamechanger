@@ -181,30 +181,30 @@ function runTests() {
   const testCases = [
     {
       name: '法人税及び地方法人税申告書の解析',
-      fileName: '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf',
+      fileName: '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf',
       expected: {
         documentType: DocumentType.CORPORATE_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         suggestedName: '0001_法人税及び地方法人税申告書_2407.pdf'
       }
     },
     {
       name: '消費税申告書の解析',
-      fileName: '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf',
+      fileName: '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf',
       expected: {
         documentType: DocumentType.CONSUMPTION_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         suggestedName: '3001_消費税及び地方消費税申告書_2407.pdf'
       }
     },
     {
       name: '東京都の都道府県税申告書の解析',
-      fileName: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf',
+      fileName: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf',
       expected: {
         documentType: DocumentType.PREFECTURAL_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         prefecture: '東京都',
         suggestedName: '1000_都道府県税申告書_2407.pdf'
@@ -212,10 +212,10 @@ function runTests() {
     },
     {
       name: '福岡市の市民税申告書の解析',
-      fileName: '福岡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720133028.pdf',
+      fileName: '福岡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720133028.pdf',
       expected: {
         documentType: DocumentType.MUNICIPAL_TAX,
-        companyName: 'メトロノーム株式会社',
+        companyName: 'テスト会社株式会社',
         fiscalYear: '2407',
         municipality: '福岡市',
         suggestedName: '2000_市民税申告書_2407.pdf'
@@ -292,7 +292,7 @@ function runTests() {
       // 推奨名の生成と確認
       const suggestedName = renamer.generateSuggestedName(
         analysis.documentType,
-        analysis.companyName || 'メトロノーム株式会社',
+        analysis.companyName || 'テスト会社株式会社',
         analysis.fiscalYear || '2407',
         analysis.prefecture,
         analysis.municipality

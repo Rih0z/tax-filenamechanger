@@ -23,11 +23,11 @@ describe('サンプルファイル処理実証テスト', () => {
 
   describe('実際のサンプルファイル名解析テスト', () => {
     test('法人税及び地方法人税申告書の正確な解析', () => {
-      const fileName = '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf';
+      const fileName = '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf';
       const analysis = (pdfParser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.CORPORATE_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
       expect(analysis.confidence).toBeGreaterThan(0.8);
 
@@ -41,11 +41,11 @@ describe('サンプルファイル処理実証テスト', () => {
     });
 
     test('消費税申告書の正確な解析', () => {
-      const fileName = '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf';
+      const fileName = '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf';
       const analysis = (pdfParser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.CONSUMPTION_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.fiscalYear).toBe('2407');
 
       const suggestedName = fileRenamer.generateSuggestedName(
@@ -57,11 +57,11 @@ describe('サンプルファイル処理実証テスト', () => {
     });
 
     test('東京都の都道府県税申告書の正確な解析', () => {
-      const fileName = '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf';
+      const fileName = '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf';
       const analysis = (pdfParser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.PREFECTURAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.prefecture).toBe('東京都');
       expect(analysis.fiscalYear).toBe('2407');
 
@@ -75,20 +75,20 @@ describe('サンプルファイル処理実証テスト', () => {
     });
 
     test('愛知県の都道府県税申告書の正確な解析', () => {
-      const fileName = '愛知県　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社.pdf';
+      const fileName = '愛知県　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社.pdf';
       const analysis = (pdfParser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.PREFECTURAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.prefecture).toBe('愛知県');
     });
 
     test('福岡市の市民税申告書の正確な解析', () => {
-      const fileName = '福岡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720133028.pdf';
+      const fileName = '福岡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720133028.pdf';
       const analysis = (pdfParser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.MUNICIPAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.municipality).toBe('福岡市');
       expect(analysis.fiscalYear).toBe('2407');
 
@@ -103,11 +103,11 @@ describe('サンプルファイル処理実証テスト', () => {
     });
 
     test('蒲郡市の市民税申告書の正確な解析', () => {
-      const fileName = '蒲郡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720132131.pdf';
+      const fileName = '蒲郡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720132131.pdf';
       const analysis = (pdfParser as any).analyzeFileName(fileName);
       
       expect(analysis.documentType).toBe(DocumentType.MUNICIPAL_TAX);
-      expect(analysis.companyName).toBe('メトロノーム株式会社');
+      expect(analysis.companyName).toBe('テスト会社株式会社');
       expect(analysis.municipality).toBe('蒲郡市');
       expect(analysis.fiscalYear).toBe('2407');
     });
@@ -185,9 +185,9 @@ describe('サンプルファイル処理実証テスト', () => {
 
     test('添付書類の正確な解析', () => {
       const testCases = [
-        { fileName: 'イメージ添付書類(法人税申告)_20250331エバーリッジ株式会社_20250721083608.pdf', 
+        { fileName: 'イメージ添付書類(法人税申告)_20250331サンプル会社株式会社_20250721083608.pdf', 
           expectedType: DocumentType.CORPORATE_TAX_ATTACHMENT,
-          expectedCompany: 'エバーリッジ株式会社' },
+          expectedCompany: 'サンプル会社株式会社' },
         { fileName: 'イメージ添付書類(法人消費税申告)_20250115六興実業株式会社_20250721083729.pdf', 
           expectedType: DocumentType.CONSUMPTION_TAX_ATTACHMENT,
           expectedCompany: '六興実業株式会社' }
@@ -213,23 +213,23 @@ describe('サンプルファイル処理実証テスト', () => {
     test('全サンプルファイルの推奨名生成', () => {
       const testCases = [
         {
-          originalName: '法人税及び地方法人税申告書_20240731メトロノーム株式会社_20250720130102.pdf',
+          originalName: '法人税及び地方法人税申告書_20240731テスト会社株式会社_20250720130102.pdf',
           expectedSuggestion: '0001_法人税及び地方法人税申告書_2407.pdf'
         },
         {
-          originalName: '消費税申告書_20240731メトロノーム株式会社_20250720130433.pdf',
+          originalName: '消費税申告書_20240731テスト会社株式会社_20250720130433.pdf',
           expectedSuggestion: '3001_消費税及び地方消費税申告書_2407.pdf'
         },
         {
-          originalName: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731メトロノーム　株式会社_20250720133418.pdf',
+          originalName: '東京都　法人都道府県民税・事業税・特別法人事業税又は地方法人特別税　確定申告_20240731テスト会社　株式会社_20250720133418.pdf',
           expectedSuggestion: '1000_都道府県税申告書_2407.pdf'
         },
         {
-          originalName: '福岡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720133028.pdf',
+          originalName: '福岡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720133028.pdf',
           expectedSuggestion: '2000_市民税申告書_2407.pdf'
         },
         {
-          originalName: '蒲郡市　法人市町村民税　確定申告_20240731メトロノーム　株式会社_20250720132131.pdf',
+          originalName: '蒲郡市　法人市町村民税　確定申告_20240731テスト会社　株式会社_20250720132131.pdf',
           expectedSuggestion: '2000_市民税申告書_2407.pdf'
         },
         {
@@ -274,7 +274,7 @@ describe('サンプルファイル処理実証テスト', () => {
           // 会社名や決算期が取れない場合のデフォルト値
           suggestedName = fileRenamer.generateSuggestedName(
             analysis.documentType,
-            'メトロノーム株式会社',
+            'テスト会社株式会社',
             '2407'
           );
         }
@@ -297,7 +297,7 @@ describe('サンプルファイル処理実証テスト', () => {
       for (const testCase of testCases) {
         const suggestedName = fileRenamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           '2407'
         );
         expect(suggestedName.startsWith(testCase.expectedPrefix)).toBe(true);
@@ -307,7 +307,7 @@ describe('サンプルファイル処理実証テスト', () => {
     test('1000番台：都道府県税関連', () => {
       const suggestedName = fileRenamer.generateSuggestedName(
         DocumentType.PREFECTURAL_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       expect(suggestedName.startsWith('1000')).toBe(true);
@@ -316,7 +316,7 @@ describe('サンプルファイル処理実証テスト', () => {
     test('2000番台：市民税関連', () => {
       const suggestedName = fileRenamer.generateSuggestedName(
         DocumentType.MUNICIPAL_TAX,
-        'メトロノーム株式会社',
+        'テスト会社株式会社',
         '2407'
       );
       expect(suggestedName.startsWith('2000')).toBe(true);
@@ -331,7 +331,7 @@ describe('サンプルファイル処理実証テスト', () => {
       for (const testCase of testCases) {
         const suggestedName = fileRenamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           '2407'
         );
         expect(suggestedName.startsWith(testCase.expectedPrefix)).toBe(true);
@@ -351,7 +351,7 @@ describe('サンプルファイル処理実証テスト', () => {
       for (const testCase of testCases) {
         const suggestedName = fileRenamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           '2407'
         );
         expect(suggestedName.startsWith(testCase.expectedPrefix)).toBe(true);
@@ -368,7 +368,7 @@ describe('サンプルファイル処理実証テスト', () => {
       for (const testCase of testCases) {
         const suggestedName = fileRenamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           '2407'
         );
         expect(suggestedName.startsWith(testCase.expectedPrefix)).toBe(true);
@@ -384,7 +384,7 @@ describe('サンプルファイル処理実証テスト', () => {
       for (const testCase of testCases) {
         const suggestedName = fileRenamer.generateSuggestedName(
           testCase.docType,
-          'メトロノーム株式会社',
+          'テスト会社株式会社',
           '2407'
         );
         expect(suggestedName.startsWith(testCase.expectedPrefix)).toBe(true);
