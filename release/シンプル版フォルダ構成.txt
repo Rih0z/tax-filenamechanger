@@ -1,0 +1,21 @@
+🎯 シンプル版release構成（第7条準拠）
+
+【現在保持中】
+✅ 税務書類リネーマー.exe          # メイン実行ファイル（85MB）
+✅ latest-bug-fixed-app.js         # 軽量テスト版（8KB）  
+✅ README.md                       # 使用方法
+
+【削除対象・手動削除が必要】
+❌ gui-app/, gui-app-fixed/, gui-app-full/, gui-app-simple/  # 使用中のため削除不可
+❌ 税務書類リネーマーv4.0-test/                              # 使用中のため削除不可
+
+【理想の最終構成】
+release/
+├── 税務書類リネーマー.exe          # 85MB - メインEXE
+├── latest-bug-fixed-app.js         # 8KB  - 軽量テスト版  
+└── README.md                       # 使用方法
+
+【EXE数確認】
+- メインEXE: 1個のみ ✅ (第7条準拠)
+- 重複EXE: 0個 ✅
+- 古いEXE: 削除済み ✅
