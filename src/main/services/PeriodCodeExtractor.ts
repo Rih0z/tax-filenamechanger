@@ -159,7 +159,7 @@ export class PeriodCodeExtractor {
             return config.periodCodeConfig.defaultPeriodCode;
         } catch (error) {
             console.error('[PeriodCodeExtractor] Config not loaded, using environment fallback');
-            return process.env.FALLBACK_PERIOD_CODE || '2405'; // 環境変数優先
+            return process.env.FALLBACK_PERIOD_CODE || new Date().toISOString().slice(2,4) + String(new Date().getMonth() + 1).padStart(2, '0'); // 現在年月を動的生成
         }
     }
 }
