@@ -9,7 +9,7 @@ ai_coding_principles:
     project_name: "Tax Document Auto-Rename System"
     
   core_principles:
-    mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
+    mandatory_declaration: "全てのコーディング作業開始時に必ず第1条から第10条までの全core_principlesを完全に宣言すること。作業完了時も再度全宣言を実施し遵守確認すること"
     第1条: 
       rule: "常に思考開始前にClaude.mdの第1条から第10条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
@@ -25,9 +25,9 @@ ai_coding_principles:
     第5条: 
       rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
     第6条: 
-      rule: "push前にアップロードするべきではない情報が含まれていないか確認する"
+      rule: "顧客データやセキュリティなど、push前にアップロードするべきではない情報が含まれていないか確認する。作業完了ごとにgithubに状況をpushする。"
     第7条: 
-      rule: "不要な文書やスクリプト、ファイル、フォルダを一切増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか確認する。スクリプトを作成したらscriptsフォルダに、ドキュメントはdocumentsフォルダに格納する。一時スクリプトや文書、一時ファイルはそれぞれのフォルダのtmpフォルダ以下に保存し、使用後に必ず削除する。プロジェクト構造の整理整頓を徹底し、開発効率とメンテナンス性を最優先とする"
+      rule: "不要な文書やスクリプト、ファイル、フォルダを一切増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか確認する。スクリプトを作成したらscriptsフォルダに、ドキュメントはdocumentsフォルダに格納する。一時スクリプトや文書、一時ファイルはそれぞれのフォルダのtmpフォルダ以下に保存し、使用後に必ず削除する。EXEファイルは1つのメイン版のみ維持し、古いバージョンや重複するEXEファイルは即座に削除する。releaseフォルダ内のEXE増殖を防止し、常に最新版1つのみを保持する。releaseフォルダには動作確認済みの実行可能なファイルのみを配置し、テストファイルや開発用ファイルは排除する。プロジェクト構造の整理整頓を徹底し、開発効率とメンテナンス性を最優先とする"
       related_sections: ["how_to_use_scripts", "file_structure"]
     第8条: 
       rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する"

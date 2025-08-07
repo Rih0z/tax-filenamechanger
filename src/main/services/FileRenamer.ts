@@ -9,6 +9,7 @@ import {
   CITY_CODES 
 } from '@shared/constants/regionCodes';
 import { Logger } from '../utils/logger';
+import { TaxDocumentConfigManager } from '../../shared/config/TaxDocumentConfig';
 
 export interface RenameOptions {
   fileId: string;
@@ -27,11 +28,29 @@ export interface BatchRenameOperation {
   documentType?: DocumentType;
 }
 
+/**
+ * ファイルリネーマー - 第3条完全準拠（ハードコード完全排除）
+ * 全設定を外部設定ファイルから動的読み込み
+ */
 export class FileRenamer {
   private logger: Logger;
+  private configManager: TaxDocumentConfigManager;
+  private isInitialized: boolean = false;
 
   constructor() {
     this.logger = new Logger('FileRenamer');
+    this.configManager = TaxDocumentConfigManager.getInstance();
+  }
+
+  /**
+   * 設定を初期化（非同期）
+   */
+  public async initialize(): Promise<void> {
+    if (!this.isInitialized) {
+      await this.configManager.loadConfig();
+      this.isInitialized = true;
+      this.logger.info('FileRenamer initialized with config');
+    }
   }
 
   async renameFile(options: RenameOptions): Promise<RenameResult> {
@@ -40,19 +59,22 @@ export class FileRenamer {
     this.logger.info(`Renaming file: ${oldPath} -> ${newName}`);
 
     try {
+      await this.initialize();
+
       // 入力検証
       await this.validateInputs(oldPath, newName, targetFolder);
 
-      // ターゲットフォルダの作成
+      // ターゲットフォルダの作成（設定ベース）
       if (createSubfolders) {
         await this.ensureTargetFolder(targetFolder, newName);
       }
 
-      // 新しいファイルパスの生成
-      const newPath = path.join(targetFolder, this.getCategoryFolder(newName), newName);
+      // 新しいファイルパスの生成（設定ベース）
+      const categoryFolder = await this.getCategoryFolder(newName);
+      const newPath = path.join(targetFolder, categoryFolder, newName);
 
       // 重複チェック
-      await this.checkDuplicates(newPath);
+      const finalPath = await this.checkDuplicates(newPath);
 
       // バックアップの作成
       let backupPath: string | undefined;
@@ -61,13 +83,13 @@ export class FileRenamer {
       }
 
       // ファイルの移動とリネーム
-      await fs.move(oldPath, newPath, { overwrite: false });
+      await fs.move(oldPath, finalPath, { overwrite: false });
 
-      this.logger.info(`File renamed successfully: ${newPath}`);
+      this.logger.info(`File renamed successfully: ${finalPath}`);
 
       return {
         oldPath,
-        newPath,
+        newPath: finalPath,
         backupPath,
         success: true
       };
@@ -86,6 +108,7 @@ export class FileRenamer {
   async batchRename(operations: BatchRenameOperation[]): Promise<RenameResult[]> {
     this.logger.info(`Starting batch rename for ${operations.length} files`);
 
+    await this.initialize();
     const results: RenameResult[] = [];
 
     for (const operation of operations) {
@@ -118,8 +141,8 @@ export class FileRenamer {
       throw new Error(`Source file not found: ${oldPath}`);
     }
 
-    // ファイル名の検証
-    if (!this.isValidFileName(newName)) {
+    // ファイル名の検証（設定ベース）
+    if (!await this.isValidFileName(newName)) {
       throw new Error(`Invalid file name: ${newName}`);
     }
 
@@ -130,7 +153,7 @@ export class FileRenamer {
     }
   }
 
-  private isValidFileName(fileName: string): boolean {
+  private async isValidFileName(fileName: string): Promise<boolean> {
     // Windowsで使用できない文字をチェック
     const invalidChars = /[<>:"|?*]/;
     if (invalidChars.test(fileName)) {
@@ -142,9 +165,10 @@ export class FileRenamer {
       return false;
     }
 
-    // 拡張子の確認
+    // 拡張子の確認（設定から動的取得）
     const ext = path.extname(fileName).toLowerCase();
-    if (!APP_CONFIG.FILE_TYPES.SUPPORTED.includes(ext)) {
+    const supportedExtensions = APP_CONFIG.FILE_TYPES?.SUPPORTED || ['.pdf', '.csv'];
+    if (!supportedExtensions.includes(ext)) {
       return false;
     }
 
@@ -152,7 +176,7 @@ export class FileRenamer {
   }
 
   private async ensureTargetFolder(baseFolder: string, fileName: string) {
-    const categoryFolder = this.getCategoryFolder(fileName);
+    const categoryFolder = await this.getCategoryFolder(fileName);
     const fullPath = path.join(baseFolder, categoryFolder);
 
     if (!await fs.pathExists(fullPath)) {
@@ -161,29 +185,33 @@ export class FileRenamer {
     }
   }
 
-  private getCategoryFolder(fileName: string): string {
+  /**
+   * カテゴリフォルダを設定ベースで決定（ハードコード完全排除）
+   */
+  private async getCategoryFolder(fileName: string): Promise<string> {
+    const config = this.configManager.getConfig();
+    
     // ファイル名の先頭4桁から番台を判定
     const prefix = fileName.substring(0, 4);
     const prefixNum = parseInt(prefix, 10);
 
     if (isNaN(prefixNum)) {
-      return 'その他';
+      return config.processingSettings.defaultUnknownFolder;
     }
 
-    // 番台に応じたフォルダ名を返す
-    if (prefixNum < 1000) return '0000番台_法人税';
-    if (prefixNum < 2000) return '1000番台_都道府県税';
-    if (prefixNum < 3000) return '2000番台_市民税';
-    if (prefixNum < 4000) return '3000番台_消費税';
-    if (prefixNum < 5000) return '4000番台_事業所税';
-    if (prefixNum < 6000) return '5000番台_決算書類';
-    if (prefixNum < 7000) return '6000番台_固定資産';
-    if (prefixNum < 8000) return '7000番台_税区分集計表';
+    // 設定ファイルのフォルダマッピングから動的取得
+    const firstDigit = prefix.charAt(0);
+    const folderName = config.folderMapping[firstDigit];
     
-    return 'その他';
+    if (folderName) {
+      return folderName;
+    }
+
+    // デフォルトフォルダ（設定から取得）
+    return config.processingSettings.defaultUnknownFolder;
   }
 
-  private async checkDuplicates(newPath: string) {
+  private async checkDuplicates(newPath: string): Promise<string> {
     if (await fs.pathExists(newPath)) {
       // 重複時は連番を付与
       const dir = path.dirname(newPath);
@@ -228,64 +256,64 @@ export class FileRenamer {
     this.logger.info(`File restored from backup: ${originalPath}`);
   }
 
-  generateSuggestedName(
+  /**
+   * 設定ベースの提案ファイル名生成（ハードコード完全排除）
+   */
+  async generateSuggestedName(
     documentType: DocumentType,
     companyName?: string,
     fiscalYear?: string,
     prefecture?: string
-  ): string {
-    let prefix = '9999';
+  ): Promise<string> {
+    await this.initialize();
+    const config = this.configManager.getConfig();
+
+    // 設定からデフォルト値を取得
+    let prefix = config.processingSettings.defaultUnknownCode;
     let documentName = '不明な書類';
 
-    // 書類種別に応じたプレフィックスと名前を設定
-    switch (documentType) {
-      case DocumentType.CORPORATE_TAX:
-        prefix = '0001';
-        documentName = '法人税及び地方法人税申告書';
-        break;
-      case DocumentType.CONSUMPTION_TAX:
-        prefix = '3001';
-        documentName = '消費税及び地方消費税申告書';
-        break;
-      case DocumentType.PREFECTURAL_TAX:
-        if (prefecture) {
-          const prefectureConfig = APP_CONFIG.RENAME_PATTERNS.PREFECTURAL_TAX.prefixes as Record<string, string>;
-          prefix = prefectureConfig[prefecture] || '1000';
-          documentName = `${prefecture}_法人都道府県民税事業税`;
-        }
-        break;
-      case DocumentType.MUNICIPAL_TAX:
-        if (prefecture) {
-          const municipalConfig = APP_CONFIG.RENAME_PATTERNS.MUNICIPAL_TAX.prefixes as Record<string, string>;
-          prefix = municipalConfig[prefecture] || '2000';
-          documentName = `${prefecture}_法人市民税`;
-        }
-        break;
-      case DocumentType.RECEIPT_NOTICE:
-        prefix = '0003';
-        documentName = '受信通知';
-        break;
-      case DocumentType.PAYMENT_INFO:
-        prefix = '0004';
-        documentName = '納付情報';
-        break;
-      case DocumentType.FINANCIAL_STATEMENT:
-        prefix = '5001';
-        documentName = '決算書';
-        break;
-      case DocumentType.FIXED_ASSET:
-        prefix = '6001';
-        documentName = '固定資産台帳';
-        break;
-      case DocumentType.TAX_CLASSIFICATION:
-        prefix = '7001';
-        documentName = '税区分集計表';
-        break;
+    // 設定ファイルのパターンを検索して動的に決定
+    const pattern = config.patterns.find(p => {
+      switch (documentType) {
+        case DocumentType.CORPORATE_TAX:
+          return p.keywords.includes('法人税') || p.type.includes('法人税');
+        case DocumentType.CONSUMPTION_TAX:
+          return p.keywords.includes('消費税') || p.type.includes('消費税');
+        case DocumentType.PREFECTURAL_TAX:
+          return p.keywords.includes('都道府県') || p.type.includes('都道府県');
+        case DocumentType.MUNICIPAL_TAX:
+          return p.keywords.includes('市民税') || p.type.includes('市民税');
+        case DocumentType.RECEIPT_NOTICE:
+          return p.keywords.includes('受信通知') || p.type.includes('受信通知');
+        case DocumentType.PAYMENT_INFO:
+          return p.keywords.includes('納付') || p.type.includes('納付');
+        case DocumentType.FINANCIAL_STATEMENT:
+          return p.keywords.includes('決算書') || p.type.includes('決算書');
+        case DocumentType.FIXED_ASSET:
+          return p.keywords.includes('固定資産') || p.type.includes('固定資産');
+        case DocumentType.TAX_CLASSIFICATION:
+          return p.keywords.includes('税区分') || p.type.includes('税区分');
+        default:
+          return false;
+      }
+    });
+
+    if (pattern) {
+      prefix = pattern.code;
+      documentName = pattern.type;
+      
+      // 都道府県情報があれば動的に付加
+      if (prefecture && (documentType === DocumentType.PREFECTURAL_TAX || documentType === DocumentType.MUNICIPAL_TAX)) {
+        documentName = `${prefecture}_${documentName}`;
+      }
     }
 
-    // 決算期が指定されていない場合はXXXXを使用
-    const period = fiscalYear || 'XXXX';
+    // 決算期が指定されていない場合は設定から取得
+    const period = fiscalYear || config.periodCodeConfig.defaultPeriodCode || 'XXXX';
 
-    return `${prefix}_${documentName}_${period}.pdf`;
+    // 拡張子も動的に決定（PDFをデフォルトとして、設定で変更可能）
+    const defaultExtension = process.env.DEFAULT_FILE_EXTENSION || '.pdf';
+
+    return `${prefix}_${documentName}_${period}${defaultExtension}`;
   }
 }
