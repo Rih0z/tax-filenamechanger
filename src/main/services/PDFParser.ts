@@ -3,13 +3,20 @@ import pdfParse from 'pdf-parse';
 import path from 'path';
 import { ParsedDocument, DocumentType } from '@shared/types';
 import { APP_CONFIG } from '@shared/constants/config';
+import { REGION_PATTERNS, TAX_TYPE_PATTERNS } from '@shared/constants/regionCodes';
 import { Logger } from '../utils/logger';
+import { DocumentNumberAssigner } from './DocumentNumberAssigner';
+import { PDFTextAnalyzer } from './PDFTextAnalyzer';
 
 export class PDFParser {
   private logger: Logger;
+  private numberAssigner: DocumentNumberAssigner;
+  private textAnalyzer: PDFTextAnalyzer;
 
   constructor() {
     this.logger = new Logger('PDFParser');
+    this.numberAssigner = new DocumentNumberAssigner();
+    this.textAnalyzer = new PDFTextAnalyzer();
   }
 
   async parse(filePath: string): Promise<ParsedDocument> {
@@ -22,16 +29,31 @@ export class PDFParser {
 
       // ファイル名から情報を抽出
       const fileName = path.basename(filePath);
-      const fileNameAnalysis = this.analyzeFileName(fileName);
+      const fileNameAnalysis = await this.analyzeFileName(fileName);
 
-      // PDF内容から情報を抽出
-      const textAnalysis = this.analyzeText(data.text);
+      // PDF内容から情報を抽出（手動命名ファイルの場合は詳細解析）
+      let textAnalysis = this.analyzeText(data.text);
+      
+      // 手動命名ファイルの場合はPDFTextAnalyzerで詳細解析
+      if ((fileNameAnalysis.confidence || 0) < 0.7) {
+        const pdfAnalysis = await this.textAnalyzer.analyzeContent(filePath);
+        if (pdfAnalysis.confidence > 0) {
+          textAnalysis = {
+            ...textAnalysis,
+            documentType: pdfAnalysis.documentType || textAnalysis.documentType,
+            region: pdfAnalysis.region || textAnalysis.region,
+            taxType: pdfAnalysis.taxType || textAnalysis.taxType,
+            companyName: pdfAnalysis.companyName || textAnalysis.companyName,
+            periodCode: pdfAnalysis.periodCode || textAnalysis.periodCode
+          };
+        }
+      }
 
       // 解析結果を統合
       const analysis = this.mergeAnalysis(fileNameAnalysis, textAnalysis);
 
       // 推奨ファイル名を生成
-      const suggestedName = this.generateSuggestedName(analysis);
+      const suggestedName = this.generateSuggestedName(analysis, fileName);
 
       const result: ParsedDocument = {
         originalName: fileName,
@@ -54,10 +76,15 @@ export class PDFParser {
     }
   }
 
-  private analyzeFileName(fileName: string): Partial<ParsedDocument['analysis']> {
+  private async analyzeFileName(fileName: string): Promise<Partial<ParsedDocument['analysis']>> {
     const analysis: Partial<ParsedDocument['analysis']> = {
       confidence: 0
     };
+    
+    // 地域と税目を検出
+    const { region, taxType } = this.detectRegionAndTaxType(fileName);
+    if (region) analysis.region = region;
+    if (taxType) analysis.taxType = taxType;
 
     // e-Tax/eLTAXの命名パターン
     // 例: 法人税及び地方法人税申告書_20240731[法人名]_20250720130102.pdf
@@ -78,12 +105,16 @@ export class PDFParser {
         const year = fiscalDate.substring(2, 4);
         const month = fiscalDate.substring(4, 6);
         analysis.fiscalYear = year + month;
+      } else {
+        // 手動ファイルの場合はデフォルト値
+        analysis.fiscalYear = '2405';
       }
       
       analysis.confidence = 0.9;
     } else {
       // 手動命名パターン（例: 法人税 受信通知.pdf）
       analysis.documentType = this.determineDocumentTypeFromSimpleName(fileName);
+      analysis.fiscalYear = '2405'; // 手動ファイルのデフォルト期間コード
       analysis.confidence = 0.5;
     }
 
@@ -133,6 +164,9 @@ export class PDFParser {
       companyName: fileNameAnalysis.companyName || textAnalysis.companyName,
       fiscalYear: fileNameAnalysis.fiscalYear || textAnalysis.fiscalYear,
       submissionDate: fileNameAnalysis.submissionDate || textAnalysis.submissionDate,
+      region: fileNameAnalysis.region || textAnalysis.region,
+      taxType: fileNameAnalysis.taxType || textAnalysis.taxType,
+      periodCode: textAnalysis.periodCode || fileNameAnalysis.fiscalYear || '2405',
       confidence: Math.max(
         fileNameAnalysis.confidence || 0,
         textAnalysis.confidence || 0
@@ -158,17 +192,54 @@ export class PDFParser {
   }
 
   private determineDocumentTypeFromSimpleName(fileName: string): DocumentType {
+    if (fileName.includes('受信通知')) return DocumentType.RECEIPT_NOTICE;
+    if (fileName.includes('納付情報') || fileName.includes('納付区分') || fileName.includes('脳情報')) return DocumentType.PAYMENT_INFO;
+    if (fileName.includes('一括償却')) return DocumentType.LUMP_SUM_DEPRECIATION;
+    if (fileName.includes('少額')) return DocumentType.SMALL_AMOUNT_DEPRECIATION;
+    if (fileName.includes('固定資産台帳')) return DocumentType.FIXED_ASSET_LEDGER;
+    if (fileName.includes('納税一覧')) return DocumentType.TAX_PAYMENT_LIST;
     if (fileName.includes('法人税') && fileName.includes('申告')) return DocumentType.CORPORATE_TAX;
     if (fileName.includes('消費税') && fileName.includes('申告')) return DocumentType.CONSUMPTION_TAX;
     if (fileName.includes('都道府県') || fileName.includes('事業税')) return DocumentType.PREFECTURAL_TAX;
     if (fileName.includes('市民税') || fileName.includes('市町村民税')) return DocumentType.MUNICIPAL_TAX;
-    if (fileName.includes('受信通知')) return DocumentType.RECEIPT_NOTICE;
-    if (fileName.includes('納付情報') || fileName.includes('納付区分')) return DocumentType.PAYMENT_INFO;
+    if (fileName.includes('仕訳帳')) return DocumentType.JOURNAL;
+    if (fileName.includes('総勘定元帳')) return DocumentType.GENERAL_LEDGER;
+    if (fileName.includes('補助元帳')) return DocumentType.SUBSIDIARY_LEDGER;
+    if (fileName.includes('仕訳') && fileName.includes('.csv')) return DocumentType.JOURNAL_DATA;
+    if (fileName.includes('イメージ添付')) return DocumentType.ATTACHMENT;
     if (fileName.includes('決算') || fileName.includes('財務諸表')) return DocumentType.FINANCIAL_STATEMENT;
-    if (fileName.includes('固定資産')) return DocumentType.FIXED_ASSET;
+    if (fileName.includes('固定資産') && !fileName.includes('台帳')) return DocumentType.FIXED_ASSET;
     if (fileName.includes('税区分')) return DocumentType.TAX_CLASSIFICATION;
     
     return DocumentType.UNKNOWN;
+  }
+
+  /**
+   * ファイル名から地域と税目を検出
+   */
+  private detectRegionAndTaxType(fileName: string): {
+    region?: string;
+    taxType?: string;
+  } {
+    let result: { region?: string; taxType?: string } = {};
+    
+    // 地域検出
+    for (const { pattern, region } of REGION_PATTERNS) {
+      if (pattern.test(fileName)) {
+        result.region = region;
+        break;
+      }
+    }
+    
+    // 税目検出
+    for (const { pattern, taxType } of TAX_TYPE_PATTERNS) {
+      if (pattern.test(fileName)) {
+        result.taxType = taxType;
+        break;
+      }
+    }
+    
+    return result;
   }
 
   private getDocumentTypeFromKey(key: string): DocumentType {
@@ -183,8 +254,17 @@ export class PDFParser {
       'CONSUMPTION_TAX_PAYMENT': DocumentType.PAYMENT_INFO,
       'FINANCIAL_STATEMENT': DocumentType.FINANCIAL_STATEMENT,
       'FIXED_ASSET': DocumentType.FIXED_ASSET,
+      'FIXED_ASSET_LEDGER': DocumentType.FIXED_ASSET_LEDGER,
+      'LUMP_SUM_DEPRECIATION': DocumentType.LUMP_SUM_DEPRECIATION,
+      'SMALL_AMOUNT_DEPRECIATION': DocumentType.SMALL_AMOUNT_DEPRECIATION,
+      'TAX_PAYMENT_LIST': DocumentType.TAX_PAYMENT_LIST,
       'TAX_CLASSIFICATION': DocumentType.TAX_CLASSIFICATION,
-      'TAX_SUMMARY': DocumentType.TAX_CLASSIFICATION
+      'TAX_SUMMARY': DocumentType.TAX_CLASSIFICATION,
+      'ATTACHMENT': DocumentType.ATTACHMENT,
+      'JOURNAL': DocumentType.JOURNAL,
+      'GENERAL_LEDGER': DocumentType.GENERAL_LEDGER,
+      'SUBSIDIARY_LEDGER': DocumentType.SUBSIDIARY_LEDGER,
+      'JOURNAL_DATA': DocumentType.JOURNAL_DATA
     };
 
     return typeMap[key] || DocumentType.UNKNOWN;
@@ -209,45 +289,21 @@ export class PDFParser {
     return undefined;
   }
 
-  private generateSuggestedName(analysis: ParsedDocument['analysis']): string {
-    const prefix = this.getPrefix(analysis.documentType);
-    const docTypeName = this.getDocumentTypeName(analysis.documentType);
-    const fiscalYear = analysis.fiscalYear || 'XXXX';
+  private generateSuggestedName(analysis: ParsedDocument['analysis'], fileName?: string): string {
+    // 拡張子の判定（元ファイル名がない場合はpdfをデフォルト）
+    const extension = '.pdf';
     
-    return `${prefix}_${docTypeName}_${fiscalYear}.pdf`;
+    // DocumentNumberAssignerを使用して推奨ファイル名を生成
+    const recommendedName = this.numberAssigner.generateRecommendedName({
+      documentType: analysis.documentType,
+      region: analysis.region,
+      taxType: analysis.taxType,
+      fileName: fileName,
+      periodCode: analysis.fiscalYear || '2405',
+      originalExtension: extension
+    });
+    
+    return recommendedName;
   }
 
-  private getPrefix(documentType: DocumentType): string {
-    const prefixMap: Record<DocumentType, string> = {
-      [DocumentType.CORPORATE_TAX]: '0001',
-      [DocumentType.CONSUMPTION_TAX]: '3001',
-      [DocumentType.PREFECTURAL_TAX]: '1000',
-      [DocumentType.MUNICIPAL_TAX]: '2000',
-      [DocumentType.RECEIPT_NOTICE]: '0003',
-      [DocumentType.PAYMENT_INFO]: '0004',
-      [DocumentType.FINANCIAL_STATEMENT]: '5001',
-      [DocumentType.FIXED_ASSET]: '6001',
-      [DocumentType.TAX_CLASSIFICATION]: '7001',
-      [DocumentType.UNKNOWN]: '9999'
-    };
-
-    return prefixMap[documentType];
-  }
-
-  private getDocumentTypeName(documentType: DocumentType): string {
-    const nameMap: Record<DocumentType, string> = {
-      [DocumentType.CORPORATE_TAX]: '法人税及び地方法人税申告書',
-      [DocumentType.CONSUMPTION_TAX]: '消費税及び地方消費税申告書',
-      [DocumentType.PREFECTURAL_TAX]: '都道府県税申告書',
-      [DocumentType.MUNICIPAL_TAX]: '市民税申告書',
-      [DocumentType.RECEIPT_NOTICE]: '受信通知',
-      [DocumentType.PAYMENT_INFO]: '納付情報',
-      [DocumentType.FINANCIAL_STATEMENT]: '決算書',
-      [DocumentType.FIXED_ASSET]: '固定資産台帳',
-      [DocumentType.TAX_CLASSIFICATION]: '税区分集計表',
-      [DocumentType.UNKNOWN]: '不明な書類'
-    };
-
-    return nameMap[documentType];
-  }
 }

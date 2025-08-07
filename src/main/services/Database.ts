@@ -6,7 +6,7 @@ import { APP_CONFIG } from '@shared/constants/config';
 import { Logger } from '../utils/logger';
 
 export class DatabaseService {
-  private db: Database.Database | null = null;
+  private db: Database | null = null;
   private logger: Logger;
 
   constructor() {
@@ -22,7 +22,7 @@ export class DatabaseService {
       await fs.ensureDir(dbDir);
       
       // データベース接続
-      this.db = new Database(dbPath);
+      this.db = new (Database as any)(dbPath);
       this.logger.info(`Database connected: ${dbPath}`);
       
       // テーブルの作成
@@ -127,7 +127,7 @@ export class DatabaseService {
       SELECT * FROM clients ORDER BY name
     `);
 
-    return stmt.all().map(row => ({
+    return stmt.all().map((row: any) => ({
       id: row.id,
       name: row.name,
       corporateNumber: row.corporate_number,
@@ -213,7 +213,7 @@ export class DatabaseService {
     if (!this.db) throw new Error('Database not initialized');
 
     const stmt = this.db.prepare('SELECT path, processed_at FROM processed_files');
-    return stmt.all().map(row => ({
+    return stmt.all().map((row: any) => ({
       path: row.path,
       processedAt: row.processed_at
     }));
@@ -263,7 +263,7 @@ export class DatabaseService {
     const stmt = this.db.prepare(query);
     const rows = clientId ? stmt.all(clientId) : stmt.all();
 
-    return rows.map(row => ({
+    return rows.map((row: any) => ({
       id: row.id,
       clientId: row.client_id,
       clientName: row.client_name,

@@ -4,7 +4,7 @@ import { FileWatcher } from './services/FileWatcher';
 import { PDFParser } from './services/PDFParser';
 import { FileRenamer } from './services/FileRenamer';
 import { Database } from './services/Database';
-import { Logger } from './utils/logger';
+import { SimpleLogger as Logger } from './utils/simple-logger';
 import { registerIPCHandlers } from './ipc/handlers';
 import { APP_CONFIG } from '@shared/constants/config';
 
@@ -15,32 +15,56 @@ let database: Database | null = null;
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// グローバルエラーハンドラー
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection:', reason);
+});
+
 async function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: APP_CONFIG.WINDOW.WIDTH,
-    height: APP_CONFIG.WINDOW.HEIGHT,
-    minWidth: APP_CONFIG.WINDOW.MIN_WIDTH,
-    minHeight: APP_CONFIG.WINDOW.MIN_HEIGHT,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true
-    },
-    icon: path.join(__dirname, '../../resources/icon.ico'),
-    title: '税務書類リネーマー'
-  });
+  try {
+    mainWindow = new BrowserWindow({
+      width: APP_CONFIG.WINDOW.WIDTH,
+      height: APP_CONFIG.WINDOW.HEIGHT,
+      minWidth: APP_CONFIG.WINDOW.MIN_WIDTH,
+      minHeight: APP_CONFIG.WINDOW.MIN_HEIGHT,
+      webPreferences: {
+        preload: path.join(__dirname, 'main/preload.js'),
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: true
+      },
+      // icon: path.join(__dirname, '../../resources/icon.ico'),
+      title: '税務書類リネーマー',
+      show: false // まず非表示で作成
+    });
+    
+    logger.info('Main window created successfully');
 
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    if (isDev) {
+      await mainWindow.loadURL('http://localhost:3000');
+      mainWindow.webContents.openDevTools();
+    } else {
+      await mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    }
+    
+    logger.info('Page loaded successfully');
+
+    mainWindow.on('closed', () => {
+      mainWindow = null;
+    });
+    
+    // すべて準備完了後に表示
+    mainWindow.show();
+    logger.info('Main window shown');
+    
+  } catch (error) {
+    logger.error('Error creating window:', error);
+    throw error;
   }
-
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
 }
 
 async function initializeServices() {
@@ -82,14 +106,27 @@ async function initializeServices() {
 }
 
 app.whenReady().then(async () => {
-  await initializeServices();
-  createWindow();
+  try {
+    logger.info('App ready, initializing services...');
+    await initializeServices();
+    await createWindow();
+    logger.info('Application started successfully');
+  } catch (error) {
+    logger.error('Failed to start application:', error);
+    dialog.showErrorBox('起動エラー', 'アプリケーションの起動に失敗しました。');
+    app.quit();
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createWindow().catch(err => {
+        logger.error('Failed to create window on activate:', err);
+      });
     }
   });
+}).catch(error => {
+  logger.error('App ready failed:', error);
+  app.quit();
 });
 
 app.on('window-all-closed', () => {
@@ -106,6 +143,7 @@ app.on('before-quit', async () => {
   if (database) {
     await database.close();
   }
+  logger.info('App cleanup completed');
 });
 
 // セキュリティ: 外部プロトコルのオープンを制限
@@ -132,5 +170,5 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason?.toString() || 'unknown reason'}`);
 });

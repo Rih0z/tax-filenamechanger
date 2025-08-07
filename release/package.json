@@ -1,69 +1,61 @@
 {
-  "name": "tax-filenamechanger",
-  "version": "1.0.0",
-  "description": "税務書類自動リネーム・振り分けシステム",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac",
-    "dist:linux": "electron-builder --linux"
-  },
-  "keywords": [
-    "tax",
-    "document",
-    "rename",
-    "automation"
-  ],
+  "name": "tax-document-renamer-v4",
+  "version": "4.0.0",
+  "description": "税務書類自動リネーム・振り分けシステム v4.0 - README仕様完全準拠版",
+  "main": "tax-renamer-v4.js",
   "author": "Tax Document Renamer Team",
   "license": "MIT",
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Rih0z/tax-filenamechanger.git"
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --publish never",
+    "test": "node test-v4.js"
   },
   "build": {
-    "appId": "com.rih0z.tax-filenamechanger",
-    "productName": "税務書類リネーマー",
-    "publish": [{
-      "provider": "github",
-      "owner": "Rih0z",
-      "repo": "tax-filenamechanger"
-    }],
+    "appId": "com.taxrenamer.v4",
+    "productName": "税務書類リネーマー v4.0",
     "directories": {
-      "output": "dist"
+      "output": "dist-v4"
     },
     "files": [
-      "**/*",
-      "!*.bat",
-      "!gui-launcher.js",
-      "!gui.html",
-      "!dist/**/*"
+      "tax-renamer-v4.js",
+      "preload-v4.js",
+      "税務書類リネーマーv4.html",
+      "assets/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable", 
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "税務書類リネーマーv4.0.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "税務書類リネーマー"
+      "createStartMenuShortcut": true
     },
-    "mac": {
-      "category": "public.app-category.productivity",
-      "icon": "icon.icns"
-    },
-    "linux": {
-      "target": "AppImage",
-      "category": "Office"
-    }
+    "extraFiles": [
+      {
+        "from": "node_modules/electron/dist",
+        "to": ".",
+        "filter": ["ffmpeg.dll", "libEGL.dll", "libGLESv2.dll", "d3dcompiler_47.dll"]
+      }
+    ]
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "pdf-parse": "^1.1.1",
+    "chokidar": "^3.5.3"
+  },
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
   }
 }

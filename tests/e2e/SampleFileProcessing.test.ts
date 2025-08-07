@@ -188,9 +188,9 @@ describe('サンプルファイル処理実証テスト', () => {
         { fileName: 'イメージ添付書類(法人税申告)_20250331サンプル会社株式会社_20250721083608.pdf', 
           expectedType: DocumentType.CORPORATE_TAX_ATTACHMENT,
           expectedCompany: 'サンプル会社株式会社' },
-        { fileName: 'イメージ添付書類(法人消費税申告)_20250115六興実業株式会社_20250721083729.pdf', 
+        { fileName: 'イメージ添付書類(法人消費税申告)_20250115テストC会社株式会社_20250721083729.pdf', 
           expectedType: DocumentType.CONSUMPTION_TAX_ATTACHMENT,
-          expectedCompany: '六興実業株式会社' }
+          expectedCompany: 'テストC会社株式会社' }
       ];
 
       for (const testCase of testCases) {

@@ -20,7 +20,16 @@ export enum DocumentType {
   PAYMENT_INFO = '納付情報',
   FINANCIAL_STATEMENT = '決算書',
   FIXED_ASSET = '固定資産',
+  FIXED_ASSET_LEDGER = '固定資産台帳',
+  LUMP_SUM_DEPRECIATION = '一括償却資産明細表',
+  SMALL_AMOUNT_DEPRECIATION = '少額減価償却資産明細表',
+  TAX_PAYMENT_LIST = '納付税額一覧表',
   TAX_CLASSIFICATION = '税区分集計表',
+  ATTACHMENT = '添付資料',
+  JOURNAL = '仕訳帳',
+  GENERAL_LEDGER = '総勘定元帳',
+  SUBSIDIARY_LEDGER = '補助元帳',
+  JOURNAL_DATA = '仕訳データ',
   UNKNOWN = '不明'
 }
 
@@ -38,6 +47,9 @@ export interface ParsedDocument {
     companyName?: string;
     fiscalYear?: string;
     submissionDate?: string;
+    region?: string;
+    taxType?: string;
+    periodCode?: string;
     confidence: number;
   };
   suggestedName: string;

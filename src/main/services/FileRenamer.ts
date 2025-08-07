@@ -2,6 +2,12 @@ import fs from 'fs-extra';
 import path from 'path';
 import { RenameResult, DocumentType } from '@shared/types';
 import { APP_CONFIG } from '@shared/constants/config';
+import { 
+  RECEIPT_NOTICE_CODES, 
+  PAYMENT_INFO_CODES, 
+  PREFECTURE_CODES, 
+  CITY_CODES 
+} from '@shared/constants/regionCodes';
 import { Logger } from '../utils/logger';
 
 export interface RenameOptions {
@@ -243,14 +249,14 @@ export class FileRenamer {
         break;
       case DocumentType.PREFECTURAL_TAX:
         if (prefecture) {
-          const prefectureConfig = APP_CONFIG.RENAME_PATTERNS.PREFECTURAL_TAX.prefixes;
+          const prefectureConfig = APP_CONFIG.RENAME_PATTERNS.PREFECTURAL_TAX.prefixes as Record<string, string>;
           prefix = prefectureConfig[prefecture] || '1000';
           documentName = `${prefecture}_法人都道府県民税事業税`;
         }
         break;
       case DocumentType.MUNICIPAL_TAX:
         if (prefecture) {
-          const municipalConfig = APP_CONFIG.RENAME_PATTERNS.MUNICIPAL_TAX.prefixes;
+          const municipalConfig = APP_CONFIG.RENAME_PATTERNS.MUNICIPAL_TAX.prefixes as Record<string, string>;
           prefix = municipalConfig[prefecture] || '2000';
           documentName = `${prefecture}_法人市民税`;
         }

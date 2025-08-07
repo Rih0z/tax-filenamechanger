@@ -3,7 +3,7 @@ import { FileWatcher } from '../services/FileWatcher';
 import { PDFParser } from '../services/PDFParser';
 import { FileRenamer } from '../services/FileRenamer';
 import { Database } from '../services/Database';
-import { Logger } from '../utils/logger';
+import { SimpleLogger as Logger } from '../utils/simple-logger';
 import { APP_CONFIG } from '@shared/constants/config';
 import Store from 'electron-store';
 
@@ -192,7 +192,7 @@ export function registerIPCHandlers(services: Services) {
   ipcMain.handle('settings:update', async (event, settings: any) => {
     try {
       const currentSettings = store.get('settings', {});
-      const updatedSettings = { ...currentSettings, ...settings };
+      const updatedSettings = { ...(currentSettings as object), ...(settings as object) };
       store.set('settings', updatedSettings);
 
       // ファイル監視フォルダを更新

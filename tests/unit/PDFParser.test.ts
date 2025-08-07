@@ -187,7 +187,7 @@ describe('PDFParser', () => {
     test('会社名の正規化が正しく動作する', () => {
       expect((parser as any).normalizeCompanyName('テスト会社　株式会社')).toBe('テスト会社株式会社');
       expect((parser as any).normalizeCompanyName('サンプル会社株式会社')).toBe('サンプル会社株式会社');
-      expect((parser as any).normalizeCompanyName('六興実業　株式会社')).toBe('六興実業株式会社');
+      expect((parser as any).normalizeCompanyName('テストC会社　株式会社')).toBe('テストC会社株式会社');
     });
   });
 });

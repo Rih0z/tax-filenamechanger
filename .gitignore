@@ -9,6 +9,14 @@ dist-electron/
 out/
 .vite/
 
+# Executable files (use GitHub Releases instead)
+*.exe
+*.msi
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+
 # IDE
 .vscode/
 .idea/
@@ -67,6 +75,13 @@ release/package-lock.json
 release/*.log
 release/win-unpacked/
 release/builder-debug.yml
+release/builder-effective-config.yaml
 
 # Sample data
 sample/
+
+# GUI build folders (too large for git)
+release/gui-app*/
+release/dist*/
+release/税務書類リネーマーv*/
+release/税務書類リネーマーv4.0-test/

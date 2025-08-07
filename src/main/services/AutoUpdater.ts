@@ -15,7 +15,7 @@ export class AutoUpdater {
   private setupAutoUpdater() {
     // 開発環境では自動アップデートを無効化
     if (process.env.NODE_ENV === 'development') {
-      autoUpdater.updateConfigPath = undefined;
+      autoUpdater.updateConfigPath = null;
       return;
     }
 

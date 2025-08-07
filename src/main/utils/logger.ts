@@ -1,7 +1,5 @@
-import winston from 'winston';
 import path from 'path';
 import fs from 'fs-extra';
-import { APP_CONFIG } from '@shared/constants/config';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -10,56 +8,47 @@ const logDir = isDev
   ? path.join(process.cwd(), 'logs')
   : path.join(process.env.APPDATA || process.env.HOME || '', '.tax-filenamechanger', 'logs');
 
-fs.ensureDirSync(logDir);
+try {
+  fs.ensureDirSync(logDir);
+} catch (error) {
+  // ログディレクトリ作成失敗時は無視
+}
 
-// カスタムフォーマット
-const customFormat = winston.format.printf(({ timestamp, level, message, context, ...metadata }) => {
-  let msg = `${timestamp} [${level.toUpperCase()}]`;
-  if (context) {
-    msg += ` [${context}]`;
+// シンプルなログ書き込み関数
+function writeLog(level: string, message: string, context?: string, metadata?: any) {
+  try {
+    const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    let logMessage = `${timestamp} [${level.toUpperCase()}]`;
+    
+    if (context) {
+      logMessage += ` [${context}]`;
+    }
+    
+    logMessage += ` ${message}`;
+    
+    if (metadata && Object.keys(metadata).length > 0) {
+      logMessage += ` ${JSON.stringify(metadata)}`;
+    }
+    
+    logMessage += '\n';
+    
+    // コンソール出力
+    if (isDev) {
+      console.log(logMessage.trim());
+    }
+    
+    // ファイル出力（同期処理でエラー回避）
+    const logFile = path.join(logDir, 'app.log');
+    fs.appendFileSync(logFile, logMessage);
+    
+    // エラーレベルの場合は別途エラーログにも出力
+    if (level === 'error') {
+      const errorFile = path.join(logDir, 'error.log');
+      fs.appendFileSync(errorFile, logMessage);
+    }
+  } catch (error) {
+    // ログ書き込み失敗時は無視（エラーループ防止）
   }
-  msg += ` ${message}`;
-  
-  if (Object.keys(metadata).length > 0) {
-    msg += ` ${JSON.stringify(metadata)}`;
-  }
-  
-  return msg;
-});
-
-// Winstonロガーの設定
-const winstonLogger = winston.createLogger({
-  level: APP_CONFIG.LOGGING.LEVEL,
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.errors({ stack: true }),
-    customFormat
-  ),
-  transports: [
-    // ファイル出力（エラー）
-    new winston.transports.File({
-      filename: path.join(logDir, 'error.log'),
-      level: 'error',
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5
-    }),
-    // ファイル出力（全般）
-    new winston.transports.File({
-      filename: path.join(logDir, 'app.log'),
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: APP_CONFIG.LOGGING.MAX_FILES
-    })
-  ]
-});
-
-// 開発環境ではコンソールにも出力
-if (isDev) {
-  winstonLogger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    )
-  }));
 }
 
 // ロガークラス
@@ -71,11 +60,11 @@ export class Logger {
   }
 
   info(message: string, metadata?: any) {
-    winstonLogger.info(message, { context: this.context, ...metadata });
+    writeLog('info', message, this.context, metadata);
   }
 
   warn(message: string, metadata?: any) {
-    winstonLogger.warn(message, { context: this.context, ...metadata });
+    writeLog('warn', message, this.context, metadata);
   }
 
   error(message: string, error?: any, metadata?: any) {
@@ -83,15 +72,13 @@ export class Logger {
       ? { error: error.message, stack: error.stack }
       : error ? { error } : {};
     
-    winstonLogger.error(message, { 
-      context: this.context, 
-      ...errorData,
-      ...metadata 
-    });
+    writeLog('error', message, this.context, { ...errorData, ...metadata });
   }
 
   debug(message: string, metadata?: any) {
-    winstonLogger.debug(message, { context: this.context, ...metadata });
+    if (isDev) {
+      writeLog('debug', message, this.context, metadata);
+    }
   }
 
   // ログファイルのパスを取得
@@ -101,11 +88,15 @@ export class Logger {
 
   // ログファイルをクリア
   static async clearLogs(): Promise<void> {
-    const files = await fs.readdir(logDir);
-    for (const file of files) {
-      if (file.endsWith('.log')) {
-        await fs.remove(path.join(logDir, file));
+    try {
+      const files = await fs.readdir(logDir);
+      for (const file of files) {
+        if (file.endsWith('.log')) {
+          await fs.remove(path.join(logDir, file));
+        }
       }
+    } catch (error) {
+      // ログクリア失敗時は無視
     }
   }
 

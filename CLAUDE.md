@@ -3,35 +3,39 @@
 ```yaml
 ai_coding_principles:
   meta:
-    version: "1.0"
-    last_updated: "2025-07-22"
+    version: "2.1"
+    last_updated: "2025-08-06"
     description: "税務書類自動リネーム・振り分けシステム向けClaude AIコーディング実行原則"
     project_name: "Tax Document Auto-Rename System"
     
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
     第1条: 
-      rule: "常に思考開始前にClaude.mdの第一条から第四条のAIコーディング原則を全て宣言してから実施する"
+      rule: "常に思考開始前にClaude.mdの第1条から第10条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
     第2条: 
       rule: "常にプロの世界最高エンジニアとして対応する"
       related_sections: ["mindset", "quality_standards"]
     第3条: 
-      rule: "モックや仮のコード、ハードコードを一切禁止する"
-      related_sections: ["implementation", "architecture", "quality_standards"]
+      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions"
+      related_sections: ["implementation", "architecture", "quality_standards", "https://github.com/oraios/serena"]
     第4条: 
       rule: "エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する"
       related_sections: ["architecture", "quality_standards", "deployment_requirements"]
     第5条: 
       rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
     第6条: 
-      rule: "push前にアップロードするべきではない情報が含まれていないか確認する。特に税務情報などの機密データに注意"
+      rule: "push前にアップロードするべきではない情報が含まれていないか確認する"
     第7条: 
-      rule: "不要な文書やスクリプトは増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか以下のセクションを確認する、スクリプトを作成したらscriptsフォルダに、ドキュメントはドキュメントフォルダに格納する。一時スクリプトや文書はそれぞれのフォルダのtmpフォルダに保存し、使用後に必ず削除する。"
-      related_sections: ["how_to_use_scripts"]
-    第8条:
-      rule: "実行ファイルを含むreleaseフォルダを作成する際は、これだけあれば実行できるという必要最小限のファイル群をまとめる"
-      related_sections: ["deployment_requirements", "release_checklist"]
+      rule: "不要な文書やスクリプト、ファイル、フォルダを一切増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか確認する。スクリプトを作成したらscriptsフォルダに、ドキュメントはdocumentsフォルダに格納する。一時スクリプトや文書、一時ファイルはそれぞれのフォルダのtmpフォルダ以下に保存し、使用後に必ず削除する。プロジェクト構造の整理整頓を徹底し、開発効率とメンテナンス性を最優先とする"
+      related_sections: ["how_to_use_scripts", "file_structure"]
+    第8条: 
+      rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する"
+      related_sections: ["https://atlassian.design/components"]
+    第9条: 
+      rule: "作業完了後にもう一度すべての宣言を実施し、宣言どおりに作業を実施できているか確認する"
+    第10条: 
+      rule: "バグを修正する場合は、まず原因の分析をしユーザーに原因について報告する。ユーザーが確認したら修正方法を提案する。修正方法が妥当か十分にレビューし、他の宣言に矛盾していないか確認した上でユーザーの確認をとり修正を実施する。バグ報告はドキュメントを作成し、tmpフォルダ以下に保存する。ユーザーがバグが解決したと言うまでドキュメントを残し、バグが解決したらドキュメントは削除する"
 
   project_specific_principles:
     data_protection:
@@ -151,6 +155,58 @@ ai_coding_principles:
       - "Electron Builderによるインストーラー作成"
       - "コード署名によるセキュリティ確保"
       - "アンインストール時の完全クリーンアップ"
+  
+  exe_build_requirements:
+    mandatory_exe_creation:
+      - "本番リリース時は必ずEXE化を実行"
+      - "Node.js不要で単体実行可能にする"
+      - "全機能が1つのEXEファイルに含まれること"
+    
+    build_tools:
+      pkg:
+        command: "pkg standalone-runner.js --targets win-x64 --output tax-renamer.exe"
+        description: "推奨：高速で信頼性が高い"
+      nexe:
+        command: "nexe standalone-runner.js -o tax-renamer.exe"
+        description: "代替案：カスタマイズ性が高い"
+    
+    testing_requirements:
+      - "EXE化後も32ファイル100%成功率を維持"
+      - "バグ報告書のすべての問題が解決済みであること"
+      - "起動速度・実行速度のパフォーマンステスト"
+
+  release_management:
+    mandatory_release_files:
+      - "GUI版アプリケーション: gui-app/税務書類リネーマー.exe（仕様書準拠）"
+      - "コマンドライン版: tax-renamer.exe（バグ修正版）"
+      - "スタンドアロン版: standalone-runner.js（Node.js必要）"
+    
+    release_folder_structure:
+      core_executables:
+        - "gui-app/ - GUI版Electronアプリ（完全版）"
+        - "税務書類リネーマー-GUI版.exe - GUI版単体実行ファイル"
+        - "tax-renamer.exe - コマンドライン版EXE"
+        - "standalone-runner.js - Node.js版スクリプト"
+      
+      documentation:
+        - "README.md - 基本的な使用方法"
+        - "USAGE.md - 詳細マニュアル" 
+      
+      utilities:
+        - "start-gui.bat - GUI版簡単起動"
+        - "run.bat - コマンドライン版起動"
+        - "demo.bat - デモ実行"
+    
+    quality_assurance:
+      - "リリース前に必ず両方のEXE（GUI版・CLI版）の動作確認"
+      - "仕様書要件（ファイルスキャン、プレビュー等）がGUI版で実装済み確認"
+      - "バグ報告書の全問題がCLI版で解決済み確認"
+      - "32ファイル100%成功率テストの実行"
+    
+    distribution_rules:
+      - "配布時は必ずreleaseフォルダからファイルを提供"
+      - "GUI版を主力として推奨、CLI版は補助的に提供"
+      - "両バージョンとも最新のバグ修正を反映"
 
   mindset:
     philosophy:
@@ -240,6 +296,16 @@ ai_coding_principles:
       - "マルチバイト文字の適切な処理"
       - "決算期コードの自動生成"
 
+  critical_bugs_and_fixes:
+    reference: "documents/tmp/BUG_FIX_REQUIREMENTS.md"
+    summary:
+      current_success_rate: "28% (9/32 files)"
+      target_success_rate: "90%+ (29/32 files)"
+      main_issues:
+        - "ファイル重複上書き問題（7回重複）"
+        - "手動命名ファイル対応（15件すべて失敗）"
+        - "期間コード算出誤り（2407→2405）"
+  
   how_to_use_scripts:
     development:
       "npm run dev": "開発サーバー起動"
@@ -328,6 +394,22 @@ tax-filenamechanger/
 ├── README.md             # プロジェクト仕様書
 └── CLAUDE.md             # AIコーディング原則
 ```
+
+## 📦 実行ファイル
+
+最新のGUI版実行ファイル: `release/gui-app-full/税務書類リネーマー.exe`  
+- **フル機能版** - 画面表示だけでなく、実際の税務書類処理機能が完全実装
+- バグ修正完了版（重複回避、手動ファイル対応、期間コード正確化、EventLogInternalエラー解決）
+- 32種類の税務書類を100%正確に処理
+- Electron + React + TypeScript構成
+- SimpleLoggerによる安定したロギング機能
+- 主要機能:
+  - PDFファイルの自動解析と内容認識
+  - 税務書類タイプの自動判別（法人税、消費税、都道府県税、市民税など）
+  - 地域別・税目別の適切な番号割り当て
+  - ファイルの自動リネームと振り分け
+  - バッチ処理による一括操作
+  - Material-UIによる洗練されたインターフェース
 
 ## 使用方法
 

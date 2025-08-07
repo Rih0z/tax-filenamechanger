@@ -28,6 +28,7 @@
     "type-check": "tsc --noEmit",
     "electron:rebuild": "electron-rebuild",
     "clean": "rimraf dist out .vite",
+    "postinstall": "electron-builder install-app-deps",
     "clean:all": "npm run clean && rimraf node_modules package-lock.json"
   },
   "keywords": [
@@ -68,9 +69,10 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.1.6",
+    "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.2",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
@@ -101,11 +103,13 @@
   "build": {
     "appId": "com.rih0z.tax-filenamechanger",
     "productName": "税務書類リネーマー",
-    "publish": [{
-      "provider": "github",
-      "owner": "Rih0z",
-      "repo": "tax-filenamechanger"
-    }],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Rih0z",
+        "repo": "tax-filenamechanger"
+      }
+    ],
     "directories": {
       "output": "dist-electron"
     },
