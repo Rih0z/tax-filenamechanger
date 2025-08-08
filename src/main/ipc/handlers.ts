@@ -2,7 +2,7 @@ import { ipcMain, dialog } from 'electron';
 import { FileWatcher } from '../services/FileWatcher';
 import { PDFParser } from '../services/PDFParser';
 import { FileRenamer } from '../services/FileRenamer';
-import { Database } from '../services/Database';
+import { DatabaseService } from '../services/Database';
 import { SimpleLogger as Logger } from '../utils/simple-logger';
 import { APP_CONFIG } from '../../shared/constants/config';
 import Store from 'electron-store';
@@ -11,7 +11,7 @@ interface Services {
   fileWatcher: FileWatcher;
   pdfParser: PDFParser;
   fileRenamer: FileRenamer;
-  database: Database;
+  database: DatabaseService;
   logger: Logger;
 }
 
@@ -79,12 +79,7 @@ export function registerIPCHandlers(services: Services) {
 
       if (result.success) {
         // 処理済みファイルとして記録
-        await database.recordProcessedFile({
-          path: result.newPath,
-          originalName: params.oldPath,
-          newName: params.newName,
-          documentType: 'UNKNOWN'
-        });
+        await database.markFileAsProcessed(result.newPath);
         fileWatcher.markFileAsProcessed(params.oldPath);
       }
 
@@ -110,12 +105,7 @@ export function registerIPCHandlers(services: Services) {
       // 成功したファイルを記録
       for (let i = 0; i < results.length; i++) {
         if (results[i].success) {
-          await database.recordProcessedFile({
-            path: results[i].newPath,
-            originalName: operations[i].oldPath,
-            newName: operations[i].newName,
-            documentType: operations[i].documentType || 'UNKNOWN'
-          });
+          await database.markFileAsProcessed(results[i].newPath);
           fileWatcher.markFileAsProcessed(operations[i].oldPath);
         }
       }
@@ -217,7 +207,7 @@ export function registerIPCHandlers(services: Services) {
   // クライアント一覧取得
   ipcMain.handle('client:list', async () => {
     try {
-      const clients = await database.getClients();
+      const clients = await database.getAllClients();
       return {
         success: true,
         data: {

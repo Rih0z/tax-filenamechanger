@@ -3,7 +3,7 @@ import path from 'path';
 import { FileWatcher } from './services/FileWatcher';
 import { PDFParser } from './services/PDFParser';
 import { FileRenamer } from './services/FileRenamer';
-import { Database } from './services/Database';
+import { DatabaseService } from './services/Database';
 import { SimpleLogger as Logger } from './utils/simple-logger';
 import { registerIPCHandlers } from './ipc/handlers';
 import { APP_CONFIG } from '../shared/constants/config';
@@ -11,7 +11,7 @@ import { APP_CONFIG } from '../shared/constants/config';
 const logger = new Logger('Main');
 let mainWindow: BrowserWindow | null = null;
 let fileWatcher: FileWatcher | null = null;
-let database: Database | null = null;
+let database: DatabaseService | null = null;
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -70,7 +70,7 @@ async function createWindow() {
 async function initializeServices() {
   try {
     // データベース初期化
-    database = new Database();
+    database = new DatabaseService();
     await database.initialize();
     logger.info('Database initialized');
 

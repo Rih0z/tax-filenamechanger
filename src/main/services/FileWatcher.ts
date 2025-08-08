@@ -5,13 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { FileInfo } from '../../shared/types';
 import { APP_CONFIG } from '../../shared/constants/config';
 import { Logger } from '../utils/logger';
-import { Database } from './Database';
+import { DatabaseService } from './Database';
 
 export interface FileWatcherConfig {
   folders?: string[];
   fileTypes?: string[];
   pollInterval?: number;
-  database: Database;
+  database: DatabaseService;
   onFileDetected?: (file: FileInfo) => void;
 }
 
@@ -20,7 +20,7 @@ export class FileWatcher {
   private logger: Logger;
   private watchedFolders: string[];
   private fileTypes: string[];
-  private database: Database;
+  private database: DatabaseService;
   private onFileDetected?: (file: FileInfo) => void;
   private processedFiles: Set<string> = new Set();
 
@@ -46,7 +46,7 @@ export class FileWatcher {
 
     // 処理済みファイルのリストを取得
     const processedFilesList = await this.database.getProcessedFiles();
-    this.processedFiles = new Set(processedFilesList.map(f => f.path));
+    this.processedFiles = new Set(processedFilesList);
 
     // Chokidarの設定
     this.watcher = chokidar.watch(this.watchedFolders, {
