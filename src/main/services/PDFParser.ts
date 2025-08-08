@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
 import pdfParse from 'pdf-parse';
 import path from 'path';
-import { ParsedDocument, DocumentType } from '@shared/types';
-import { APP_CONFIG } from '@shared/constants/config';
-import { REGION_PATTERNS, TAX_TYPE_PATTERNS } from '@shared/constants/regionCodes';
+import { ParsedDocument, DocumentType } from '../../shared/types';
+import { APP_CONFIG } from '../../shared/constants/config';
+import { REGION_PATTERNS, TAX_TYPE_PATTERNS } from '../../shared/constants/regionCodes';
 import { Logger } from '../utils/logger';
 import { DocumentNumberAssigner } from './DocumentNumberAssigner';
 import { PDFTextAnalyzer } from './PDFTextAnalyzer';

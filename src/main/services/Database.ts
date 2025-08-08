@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs-extra';
-import { Client, ProcessingHistory, ProcessedFileInfo } from '@shared/types';
-import { APP_CONFIG } from '@shared/constants/config';
+import { Client, ProcessingHistory, ProcessedFileInfo } from '../../shared/types';
+import { APP_CONFIG } from '../../shared/constants/config';
 import { Logger } from '../utils/logger';
 
 export class DatabaseService {

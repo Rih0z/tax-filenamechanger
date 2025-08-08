@@ -2,8 +2,8 @@ import chokidar, { FSWatcher } from 'chokidar';
 import path from 'path';
 import fs from 'fs-extra';
 import { v4 as uuidv4 } from 'uuid';
-import { FileInfo } from '@shared/types';
-import { APP_CONFIG } from '@shared/constants/config';
+import { FileInfo } from '../../shared/types';
+import { APP_CONFIG } from '../../shared/constants/config';
 import { Logger } from '../utils/logger';
 import { Database } from './Database';
 

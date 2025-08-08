@@ -6,7 +6,7 @@ import { FileRenamer } from './services/FileRenamer';
 import { Database } from './services/Database';
 import { SimpleLogger as Logger } from './utils/simple-logger';
 import { registerIPCHandlers } from './ipc/handlers';
-import { APP_CONFIG } from '@shared/constants/config';
+import { APP_CONFIG } from '../shared/constants/config';
 
 const logger = new Logger('Main');
 let mainWindow: BrowserWindow | null = null;

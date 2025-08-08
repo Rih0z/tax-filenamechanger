@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "./dist",
     "module": "CommonJS",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["shared/*"]
+    }
   },
   "include": [
     "src/main/**/*",

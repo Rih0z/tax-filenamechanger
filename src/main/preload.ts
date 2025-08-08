@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import type { FileInfo, ParsedDocument, RenameResult, Client, AppSettings } from '@shared/types';
+import type { FileInfo, ParsedDocument, RenameResult, Client, AppSettings } from '../shared/types';
 
 // レンダラープロセスに公開するAPI
 const electronAPI = {

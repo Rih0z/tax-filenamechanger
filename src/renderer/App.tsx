@@ -34,7 +34,7 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
-import { FileInfo, Client, ParsedDocument } from '@shared/types';
+import { FileInfo, Client, ParsedDocument } from '../shared/types';
 
 interface ElectronAPI {
   scanFiles: (folders: string[]) => Promise<any>;

@@ -1,13 +1,13 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { RenameResult, DocumentType } from '@shared/types';
-import { APP_CONFIG } from '@shared/constants/config';
+import { RenameResult, DocumentType } from '../../shared/types';
+import { APP_CONFIG } from '../../shared/constants/config';
 import { 
   RECEIPT_NOTICE_CODES, 
   PAYMENT_INFO_CODES, 
   PREFECTURE_CODES, 
   CITY_CODES 
-} from '@shared/constants/regionCodes';
+} from '../../shared/constants/regionCodes';
 import { Logger } from '../utils/logger';
 import { TaxDocumentConfigManager } from '../../shared/config/TaxDocumentConfig';
 

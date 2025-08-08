@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import pdfParse from 'pdf-parse';
-import { DocumentType } from '@shared/types';
+import { DocumentType } from '../../shared/types';
 import { Logger } from '../utils/logger';
 
 export interface PDFAnalysisResult {

@@ -1,10 +1,10 @@
-import { DocumentType } from '@shared/types';
-import { 
-  RECEIPT_NOTICE_CODES, 
-  PAYMENT_INFO_CODES, 
-  PREFECTURE_CODES, 
-  CITY_CODES 
-} from '@shared/constants/regionCodes';
+import { DocumentType } from '../../shared/types';
+import {
+  RECEIPT_NOTICE_CODES,
+  PAYMENT_INFO_CODES,
+  PREFECTURE_CODES,
+  CITY_CODES
+} from '../../shared/constants/regionCodes';
 import { Logger } from '../utils/logger';
 
 export interface NumberAssignmentParams {
