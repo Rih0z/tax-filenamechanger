@@ -27,7 +27,7 @@ ai_coding_principles:
     第6条: 
       rule: "顧客データやセキュリティなど、push前にアップロードするべきではない情報が含まれていないか確認する。作業完了ごとにgithubに状況をpushする。"
     第7条: 
-      rule: "不要な文書やスクリプト、ファイル、フォルダを一切増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか確認する。スクリプトを作成したらscriptsフォルダに、ドキュメントはdocumentsフォルダに格納する。一時スクリプトや文書、一時ファイルはそれぞれのフォルダのtmpフォルダ以下に保存し、使用後に必ず削除する。EXEファイルは1つのメイン版のみ維持し、古いバージョンや重複するEXEファイルは即座に削除する。releaseフォルダ内のEXE増殖を防止し、常に最新版1つのみを保持する。releaseフォルダには動作確認済みの実行可能なファイルのみを配置し、テストファイルや開発用ファイルは排除する。プロジェクト構造の整理整頓を徹底し、開発効率とメンテナンス性を最優先とする"
+      rule: "不要な文書やスクリプト、ファイル、フォルダを一切増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか確認する。スクリプトを作成したらscriptsフォルダに、ドキュメントはdocumentsフォルダに格納する。一時スクリプトや文書、一時ファイルはそれぞれのフォルダのtmpフォルダ以下に保存し、使用後に必ず削除する。EXEファイルは『税務書類リネーマー.exe』という名前の1つのみ維持し、古いバージョンや重複するEXEファイルは即座に削除する。releaseフォルダ内のEXE増殖を防止し、常に『税務書類リネーマー.exe』のポータブル版1つのみを保持する。新しいEXEファイル名を作成せず、常に同じファイル名で上書き更新する。releaseフォルダには動作確認済みの実行可能なファイルのみを配置し、テストファイルや開発用ファイルは排除する。プロジェクト構造の整理整頓を徹底し、開発効率とメンテナンス性を最優先とする"
       related_sections: ["how_to_use_scripts", "file_structure"]
     第8条: 
       rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する"
@@ -176,26 +176,23 @@ ai_coding_principles:
       - "起動速度・実行速度のパフォーマンステスト"
 
   release_management:
+    portable_only_policy:
+      - "【重要】releaseフォルダには『税務書類リネーマー.exe』のポータブル版1つのみを維持"
+      - "インストーラー版ではなく、ポータブル版のみをビルド（npm run dist:portable）"
+      - "新しいEXEファイル名を作成せず、常に同じファイル名で上書き更新"
+      - "バージョン番号をファイル名に含めない（内部バージョン管理のみ）"
+    
     mandatory_release_files:
-      - "GUI版アプリケーション: gui-app/税務書類リネーマー.exe（仕様書準拠）"
-      - "コマンドライン版: tax-renamer.exe（バグ修正版）"
-      - "スタンドアロン版: standalone-runner.js（Node.js必要）"
+      - "税務書類リネーマー.exe - ポータブル版GUI（Electron Builder Portable）"
+      - "使用方法.txt - シンプルな使用説明"
+      - "latest-bug-fixed-app.js - Node.js版スクリプト（開発用）"
     
     release_folder_structure:
-      core_executables:
-        - "gui-app/ - GUI版Electronアプリ（完全版）"
-        - "税務書類リネーマー-GUI版.exe - GUI版単体実行ファイル"
-        - "tax-renamer.exe - コマンドライン版EXE"
-        - "standalone-runner.js - Node.js版スクリプト"
-      
-      documentation:
-        - "README.md - 基本的な使用方法"
-        - "USAGE.md - 詳細マニュアル" 
-      
-      utilities:
-        - "start-gui.bat - GUI版簡単起動"
-        - "run.bat - コマンドライン版起動"
-        - "demo.bat - デモ実行"
+      prohibited_files:
+        - "インストーラー版EXE（NSIS）は作成しない"
+        - "バージョン番号付きファイル名は使用しない"
+        - "重複するEXEファイルは即座に削除"
+        - "TaxRenamer.exeなど別名のEXEは作成しない"
     
     quality_assurance:
       - "リリース前に必ず両方のEXE（GUI版・CLI版）の動作確認"
