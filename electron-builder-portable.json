@@ -1,0 +1,22 @@
+{
+  "appId": "com.rih0z.tax-filenamechanger",
+  "productName": "税務書類リネーマー",
+  "directories": {
+    "output": "dist-portable"
+  },
+  "files": [
+    "dist/**/*",
+    "resources/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": "portable",
+    "icon": "resources/icon.ico"
+  },
+  "portable": {
+    "artifactName": "税務書類リネーマー.exe"
+  },
+  "compression": "maximum",
+  "nsis": null
+}
