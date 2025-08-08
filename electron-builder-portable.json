@@ -15,8 +15,17 @@
     "icon": "resources/icon.ico"
   },
   "portable": {
-    "artifactName": "税務書類リネーマー.exe"
+    "artifactName": "税務書類リネーマー.exe",
+    "requestExecutionLevel": "user",
+    "unpackDirName": false
   },
+  "extraResources": [
+    {
+      "from": "node_modules/electron/dist",
+      "to": ".",
+      "filter": ["*.dll"]
+    }
+  ],
   "compression": "maximum",
   "nsis": null
 }
